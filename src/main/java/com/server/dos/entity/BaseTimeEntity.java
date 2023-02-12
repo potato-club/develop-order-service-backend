@@ -1,4 +1,4 @@
-package com.server.dos.Entity;
+package com.server.dos.entity;
 
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;

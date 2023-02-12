@@ -1,6 +1,6 @@
-package com.server.dos.Repository;
+package com.server.dos.repository;
 
-import com.server.dos.Entity.Order;
+import com.server.dos.entity.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {

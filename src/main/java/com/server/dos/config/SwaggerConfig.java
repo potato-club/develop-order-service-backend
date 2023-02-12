@@ -1,4 +1,4 @@
-package com.server.dos.Config;
+package com.server.dos.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

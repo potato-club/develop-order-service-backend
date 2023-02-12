@@ -1,4 +1,4 @@
-package com.server.dos.Entity;
+package com.server.dos.entity;
 
 import com.server.dos.Enum.OrderState;
 import com.server.dos.Enum.SiteOwner;
@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static javax.persistence.GenerationType.*;
@@ -19,11 +20,15 @@ import static javax.persistence.GenerationType.*;
 @AllArgsConstructor
 @Builder
 @Getter
-@Table(name = "Orders")
+@Table(name = "orders")
 public class Order extends BaseTimeEntity{
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
+    @Embedded
+    private Client client = new Client();
 
     @Column(nullable = false, unique = true)
     private String siteName;
@@ -37,7 +42,10 @@ public class Order extends BaseTimeEntity{
 
     @Column(nullable = false)
     @ElementCollection(fetch = FetchType.LAZY)
-    private List<String> brandColor;
+    private List<String> mainColor;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    private List<String> subColor;
 
     @Column(nullable = false)
     private int page;
@@ -48,12 +56,13 @@ public class Order extends BaseTimeEntity{
     @Column(nullable = false)
     private Boolean database;
 
-    @Column
-    private int duration;
+    @OneToMany(mappedBy = "order", orphanRemoval = true)
+    private List<OrderImage> orderImages = new ArrayList<>();
 
     @Column(nullable = false)
     private LocalDateTime meeting;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private OrderState state;
 }

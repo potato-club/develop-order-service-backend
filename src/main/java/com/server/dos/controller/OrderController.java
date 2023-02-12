@@ -1,13 +1,15 @@
-package com.server.dos.Controller;
+package com.server.dos.controller;
 
-import com.server.dos.Dto.OrderRequestDto;
-import com.server.dos.Dto.OrderResponseDto;
-import com.server.dos.Service.OrderService;
+import com.server.dos.dto.OrderRequestDto;
+import com.server.dos.dto.OrderResponseDto;
+import com.server.dos.service.OrderService;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -27,8 +29,9 @@ public class OrderController {
 
     @Operation(summary = "발주 신청")
     @PostMapping("")
-    public ResponseEntity<String> createOrder(@RequestBody OrderRequestDto orderDto) {
-        orderService.createOrder(orderDto);
-        return ResponseEntity.ok("발주 성공");
+    public ResponseEntity<String> createOrder(@RequestPart(value = "images") List<MultipartFile> images,
+                                              @RequestPart(value = "orderDto") OrderRequestDto orderDto) {
+        orderService.createOrder(images, orderDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body("발주 성공");
     }
 }

@@ -1,4 +1,4 @@
-package com.server.dos.Controller;
+package com.server.dos.controller;
 
 import io.swagger.annotations.Api;
 import org.springframework.stereotype.Controller;

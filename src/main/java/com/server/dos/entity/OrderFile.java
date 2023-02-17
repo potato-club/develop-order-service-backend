@@ -1,5 +1,6 @@
 package com.server.dos.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,28 +10,28 @@ import org.hibernate.annotations.OnDeleteAction;
 import javax.persistence.*;
 
 @Entity
-@Getter
 @NoArgsConstructor
-public class OrderImage {
+@Getter
+public class OrderFile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String imageName;
+    private String fileName;
 
     @Column(nullable = false)
-    private String imageUrl;
+    private String s3Url;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_detail_id")
+    @JoinColumn(name = "orders_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private OrderDetail orderDetail;
+    private Order order;
 
     @Builder
-    public OrderImage(String imageName, String imageUrl, OrderDetail orderDetail) {
-        this.imageName = imageName;
-        this.imageUrl = imageUrl;
-        this.orderDetail = orderDetail;
+    public OrderFile(String fileName, String s3Url, Order order) {
+        this.fileName = fileName;
+        this.s3Url = s3Url;
+        this.order = order;
     }
 }

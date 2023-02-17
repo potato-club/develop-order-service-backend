@@ -1,7 +1,7 @@
 package com.server.dos.entity;
 
-import com.server.dos.Enum.OrderState;
 import com.server.dos.Enum.SiteOwner;
+import com.server.dos.dto.OrderDetailRequestDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -48,7 +48,7 @@ public class Order extends BaseTimeEntity{
     private List<String> subColor;
 
     @Column(nullable = false)
-    private int page;
+    private Integer page;
 
     @Column(nullable = false)
     private Boolean login;
@@ -57,12 +57,14 @@ public class Order extends BaseTimeEntity{
     private Boolean database;
 
     @OneToMany(mappedBy = "order", orphanRemoval = true)
-    private List<OrderImage> orderImages = new ArrayList<>();
+    private List<OrderFile> orderFiles = new ArrayList<>();
 
     @Column(nullable = false)
     private LocalDateTime meeting;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private OrderState state;
+    public void update(OrderDetailRequestDto requestDto) {
+        if(requestDto.getDatabase() != null) this.database = requestDto.getDatabase();
+        if(requestDto.getLogin() != null) this.login = requestDto.getLogin();
+        if(requestDto.getPage() != null) this.page = requestDto.getPage();
+    }
 }

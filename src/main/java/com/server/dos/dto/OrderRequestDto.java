@@ -2,7 +2,6 @@ package com.server.dos.dto;
 
 import com.server.dos.entity.Client;
 import com.server.dos.entity.Order;
-import com.server.dos.Enum.OrderState;
 import com.server.dos.Enum.SiteOwner;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -46,7 +45,6 @@ public class OrderRequestDto {
                 .siteName(siteName)
                 .purpose(purpose)
                 .owner(owner)
-                .state(OrderState.WORKING)
                 .mainColor(mainColor)
                 .subColor(subColor)
                 .database(database)

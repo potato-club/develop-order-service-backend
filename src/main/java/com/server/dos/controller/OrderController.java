@@ -1,7 +1,6 @@
 package com.server.dos.controller;
 
-import com.server.dos.dto.OrderRequestDto;
-import com.server.dos.dto.OrderResponseDto;
+import com.server.dos.dto.*;
 import com.server.dos.service.OrderService;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,20 +17,48 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/orders")
 public class OrderController {
-
     private final OrderService orderService;
 
     @Operation(summary = "모든 발주 리스트 반환")
     @GetMapping("")
-    public List<OrderResponseDto> getAllOrder() {
-        return orderService.getAllOrder();
+    public ResponseEntity<List<OrderResponseDto>> getAllOrder() {
+        List<OrderResponseDto> allOrder = orderService.getAllOrder();
+        return ResponseEntity.ok(allOrder);
+    }
+    @Operation(summary = "발주 디테일 리스트 반환")
+    @GetMapping("/detail")
+    public ResponseEntity<List<OrderDetailListDto>> getOrderDetailList() {
+        List<OrderDetailListDto> allOrderDetail = orderService.getAllOrderDetail();
+        return ResponseEntity.ok(allOrderDetail);
+    }
+    @Operation(summary = "발주 디테일 반환")
+    @GetMapping("/detail/{orderId}")
+    public ResponseEntity<OrderDetailDto> getOrderDetail(@PathVariable(name = "orderId") Long orderId) {
+        OrderDetailDto orderDetail = orderService.getOrderDetail(orderId);
+        return ResponseEntity.ok(orderDetail);
     }
 
     @Operation(summary = "발주 신청")
     @PostMapping("")
-    public ResponseEntity<String> createOrder(@RequestPart(value = "images") List<MultipartFile> images,
+    public ResponseEntity<String> createOrder(@RequestPart(value = "files") List<MultipartFile> files,
                                               @RequestPart(value = "orderDto") OrderRequestDto orderDto) {
-        orderService.createOrder(images, orderDto);
+        orderService.createOrder(files, orderDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("발주 성공");
+    }
+
+    @Operation(summary = "발주 디테일 수정")
+    @PutMapping("/detail/{orderId}")
+    public ResponseEntity<String> updateOrderDetail(@PathVariable(name = "orderId") Long orderId,
+                                                    @RequestPart(value = "images", required = false) List<MultipartFile> images,
+                                                    @RequestPart(value = "orderDetail", required = false) OrderDetailRequestDto requestDto) {
+        orderService.updateOrderDetail(orderId, images, requestDto);
+        return ResponseEntity.ok("업데이트 완료");
+    }
+
+    @Operation(summary = "발주 취소")
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<?> removeOrder(@PathVariable(name = "orderId") Long orderId) {
+        orderService.removeOrder(orderId);
+        return ResponseEntity.ok("취소 완료");
     }
 }

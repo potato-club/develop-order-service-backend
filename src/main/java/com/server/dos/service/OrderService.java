@@ -15,6 +15,7 @@ import com.server.dos.repository.OrderImageRepository;
 import com.server.dos.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +24,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.server.dos.Enum.OrderState.*;
 import static com.server.dos.mapper.OrderMapper.INSTANCE;
 
 @RequiredArgsConstructor
@@ -44,7 +46,6 @@ public class OrderService {
 
     @Transactional
     public void createOrder(List<MultipartFile> files, OrderRequestDto orderDto) {
-
         Order order = orderRepository.save(orderDto.toEntity());
 
         files.stream()
@@ -54,20 +55,11 @@ public class OrderService {
 
         OrderDetail detail = OrderDetail.builder()
                 .id(order.getId())
-                .state(OrderState.WORKING)
+                .state(WORKING)
                 .order(order)
                 .build();
 
         detailRepository.save(detail);
-    }
-
-    private OrderFile saveFile(Order order, String url) {
-        OrderFile orderFile = OrderFile.builder()
-                .s3Url(url)
-                .fileName(StringUtils.getFilename(url))
-                .order(order)
-                .build();
-        return fileRepository.save(orderFile);
     }
 
     @Transactional
@@ -82,11 +74,19 @@ public class OrderService {
         return INSTANCE.toDetailDto(detail);
     }
 
+    // 로그인 구현 후 my order 가져오기도 추가
     @Transactional
-    public List<OrderDetailListDto> getAllOrderDetail() {
-        List<OrderDetail> details = detailRepository.findAll();
-        return details.stream().map(INSTANCE::toDetailListDto)
+    public Page<OrderDetailListDto> getOrderDetailList(String state, int page) {
+        List<OrderDetail> details;
+        if (state.equals("complete") || state == null) {
+            details = detailRepository.findOrderDetailsByStateOrderByIdDesc(COMPLETE);
+        } else {
+            details = detailRepository.findOrderDetailsByStateOrderByIdDesc(WORKING);
+        }
+        List<OrderDetailListDto> detailListDtos = details.stream().map(INSTANCE::toDetailListDto)
                 .map(dto -> addThumbnail(dto)).collect(Collectors.toList());
+
+        return listPaging(page, detailListDtos);
     }
 
     @Transactional
@@ -125,6 +125,15 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    private OrderFile saveFile(Order order, String url) {
+        OrderFile orderFile = OrderFile.builder()
+                .s3Url(url)
+                .fileName(StringUtils.getFilename(url))
+                .order(order)
+                .build();
+        return fileRepository.save(orderFile);
+    }
+
     private OrderImage saveImage(OrderDetail detail, String url) {
         OrderImage orderImage = OrderImage.builder()
                 .imageUrl(url)
@@ -132,5 +141,14 @@ public class OrderService {
                 .orderDetail(detail)
                 .build();
         return imageRepository.save(orderImage);
+    }
+
+    private Page<OrderDetailListDto> listPaging(int page, List<OrderDetailListDto> detailListDtos) {
+        Pageable pageable = PageRequest.of(page - 1, 4);
+
+        final int start = (int) pageable.getOffset();
+        final int end = Math.min((start + pageable.getPageSize()), detailListDtos.size());
+
+        return new PageImpl<>(detailListDtos.subList(start, end), pageable, detailListDtos.size());
     }
 }

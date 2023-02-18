@@ -5,6 +5,7 @@ import com.server.dos.service.OrderService;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,12 +26,16 @@ public class OrderController {
         List<OrderResponseDto> allOrder = orderService.getAllOrder();
         return ResponseEntity.ok(allOrder);
     }
+
     @Operation(summary = "발주 디테일 리스트 반환")
     @GetMapping("/detail")
-    public ResponseEntity<List<OrderDetailListDto>> getOrderDetailList() {
-        List<OrderDetailListDto> allOrderDetail = orderService.getAllOrderDetail();
-        return ResponseEntity.ok(allOrderDetail);
+    public ResponseEntity<Page<OrderDetailListDto>> getOrderDetailList(
+            @RequestParam(required = false, defaultValue = "working", value = "state") String state,
+            @RequestParam(required = false, defaultValue = "1", value = "page") int page) {
+        Page<OrderDetailListDto> orderDetailList = orderService.getOrderDetailList(state, page);
+        return ResponseEntity.ok(orderDetailList);
     }
+
     @Operation(summary = "발주 디테일 반환")
     @GetMapping("/detail/{orderId}")
     public ResponseEntity<OrderDetailDto> getOrderDetail(@PathVariable(name = "orderId") Long orderId) {

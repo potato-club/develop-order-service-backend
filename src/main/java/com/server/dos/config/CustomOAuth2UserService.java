@@ -1,6 +1,6 @@
 package com.server.dos.config;
 
-import com.server.dos.domain.user.OAuth2Attribute;
+import com.server.dos.entity.user.OAuth2Attribute;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

@@ -40,20 +40,20 @@ public class Order extends BaseTimeEntity{
     @Enumerated(EnumType.STRING)
     private SiteOwner owner;
 
-    @Column(nullable = false)
+    @Column
     @ElementCollection(fetch = FetchType.LAZY)
     private List<String> mainColor;
 
     @ElementCollection(fetch = FetchType.LAZY)
     private List<String> subColor;
 
-    @Column(nullable = false)
+    @Column
     private Integer page;
 
-    @Column(nullable = false)
+    @Column
     private Boolean login;
 
-    @Column(nullable = false)
+    @Column
     private Boolean database;
 
     @OneToMany(mappedBy = "order", orphanRemoval = true)
@@ -61,6 +61,9 @@ public class Order extends BaseTimeEntity{
 
     @Column(nullable = false)
     private LocalDateTime meeting;
+
+    @Column
+    private String etc;
 
     public void update(OrderDetailRequestDto requestDto) {
         if(requestDto.getDatabase() != null) this.database = requestDto.getDatabase();

@@ -45,7 +45,7 @@ public class OrderController {
 
     @Operation(summary = "발주 신청")
     @PostMapping("")
-    public ResponseEntity<String> createOrder(@RequestPart(value = "files") List<MultipartFile> files,
+    public ResponseEntity<String> createOrder(@RequestPart(value = "files", required = false) List<MultipartFile> files,
                                               @RequestPart(value = "orderDto") OrderRequestDto orderDto) {
         orderService.createOrder(files, orderDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("발주 성공");

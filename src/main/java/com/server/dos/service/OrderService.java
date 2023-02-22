@@ -1,6 +1,5 @@
 package com.server.dos.service;
 
-import com.server.dos.Enum.OrderState;
 import com.server.dos.dto.*;
 import com.server.dos.entity.OrderImage;
 import com.server.dos.entity.Order;
@@ -45,29 +44,6 @@ public class OrderService {
     }
 
     @Transactional
-    public void createOrder(List<MultipartFile> files, OrderRequestDto orderDto) {
-        Order order = orderRepository.save(orderDto.toEntity());
-
-        files.stream()
-                .map(uploadService::upload)
-                .map(url -> saveFile(order, url))
-                .collect(Collectors.toList());
-
-        OrderDetail detail = OrderDetail.builder()
-                .id(order.getId())
-                .state(WORKING)
-                .order(order)
-                .build();
-
-        detailRepository.save(detail);
-    }
-
-    @Transactional
-    public void removeOrder(Long orderId) {
-        orderRepository.deleteById(orderId);
-    }
-
-    @Transactional
     public OrderDetailDto getOrderDetail(Long orderId) {
         OrderDetail detail = detailRepository.findById(orderId)
                 .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist."));
@@ -78,7 +54,7 @@ public class OrderService {
     @Transactional
     public Page<OrderDetailListDto> getOrderDetailList(String state, int page) {
         List<OrderDetail> details;
-        if (state.equals("complete") || state == null) {
+        if (state.equals("complete")) {
             details = detailRepository.findOrderDetailsByStateOrderByIdDesc(COMPLETE);
         } else {
             details = detailRepository.findOrderDetailsByStateOrderByIdDesc(WORKING);
@@ -88,6 +64,13 @@ public class OrderService {
 
         return listPaging(page, detailListDtos);
     }
+
+    // 메인 페이지 OrderList 정보 가져오기 (완료된 발주 중 좋아요 높은 순 3개)
+    @Transactional
+    public List<OrderMainDto> getMainOrders() {
+        return null;
+    }
+
 
     @Transactional
     public OrderDetailListDto addThumbnail(OrderDetailListDto dto) {
@@ -99,6 +82,26 @@ public class OrderService {
             dto.setThumbnail(ImageMapper.INSTANCE.toDto(image));
         }
         return dto;
+    }
+
+    @Transactional
+    public void createOrder(List<MultipartFile> files, OrderRequestDto orderDto) {
+        Order order = orderRepository.save(orderDto.toEntity());
+
+        if(files != null) {
+            files.stream()
+                    .map(uploadService::upload)
+                    .map(url -> saveFile(order, url))
+                    .collect(Collectors.toList());
+        }
+
+        OrderDetail detail = OrderDetail.builder()
+                .id(order.getId())
+                .state(WORKING)
+                .order(order)
+                .build();
+
+        detailRepository.save(detail);
     }
 
     @Transactional
@@ -123,6 +126,11 @@ public class OrderService {
                 .map(uploadService::upload)
                 .map(url -> saveImage(detail, url))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void removeOrder(Long orderId) {
+        orderRepository.deleteById(orderId);
     }
 
     private OrderFile saveFile(Order order, String url) {

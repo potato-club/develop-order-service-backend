@@ -26,18 +26,20 @@ public class OrderRequestDto {
     private String purpose;
     @ApiModelProperty(value = "운영자", example = "PERSONAL", required = true)
     private SiteOwner owner;
-    @ApiModelProperty(value = "브랜드 컬러1", example = "['#FFFFFF', '#000000']", required = true)
+    @ApiModelProperty(value = "브랜드 컬러1", example = "['#FFFFFF', '#000000']")
     private List<String> mainColor;
     @ApiModelProperty(value = "브랜드 컬러2", example = "['#FFFFFF', '#000000']")
     private List<String> subColor;
-    @ApiModelProperty(value = "페이지 수", example = "1", required = true)
+    @ApiModelProperty(value = "페이지 수", example = "1")
     private Integer page;
-    @ApiModelProperty(value = "로그인 여부", example = "false", required = true)
+    @ApiModelProperty(value = "로그인 여부", example = "false")
     private Boolean login;
-    @ApiModelProperty(value = "데이터베이스 여부", example = "false", required = true)
+    @ApiModelProperty(value = "데이터베이스 여부", example = "false")
     private Boolean database;
     @ApiModelProperty(value = "희망 미팅 날짜", example = "2023-03-03 10:30", required = true)
     private String meeting;
+    @ApiModelProperty(value = "기타 추가 사항", example = "대충 만들면 돈 안줄겁니다 호호")
+    private String etc;
 
     public Order toEntity() {
         return Order.builder()
@@ -51,6 +53,7 @@ public class OrderRequestDto {
                 .login(login)
                 .meeting(parseDate(meeting))
                 .page(page)
+                .etc(etc)
                 .build();
     }
 

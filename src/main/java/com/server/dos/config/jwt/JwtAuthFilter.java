@@ -1,7 +1,6 @@
 package com.server.dos.config.jwt;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,7 +15,7 @@ public class JwtAuthFilter extends GenericFilter {  // 토큰 인증 처리
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        String token = ((HttpServletRequest)request).getHeader("Auth");
+        String token = ((HttpServletRequest)request).getHeader("Authorization");
 
         if(token != null && jwtProvider.verifyToken(token)){
             Authentication authentication = jwtProvider.getAuthentication(token);

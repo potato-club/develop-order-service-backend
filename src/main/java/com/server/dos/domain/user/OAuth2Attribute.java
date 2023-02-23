@@ -39,7 +39,15 @@ public class OAuth2Attribute {
                 .attributeKey(attributeKey)
                 .build();
     }
-
+//    private static OAuth2Attribute ofGoogle(String attributeKey, Map<String,Object> attributes){
+//
+//        return OAuth2Attribute.builder()
+//                .nickname((String)googleAccount.get("name"))
+//                .email((String) kakaoAccount.get("email"))
+//                .attributes(attributes)
+//                .attributeKey(attributeKey)
+//                .build();
+//    }
     public Map<String,Object> convertToMap(){
         Map<String,Object>map = new HashMap<>();
         map.put("id",attributeKey);

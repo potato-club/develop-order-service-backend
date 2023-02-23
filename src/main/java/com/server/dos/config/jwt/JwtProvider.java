@@ -14,8 +14,8 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.security.Key;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -23,15 +23,14 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class JwtProvider {  // 토큰 인증 및 검증
-    private String secretKey;
+    private final Key key;
     private final long accessExpire = 1000 * 60 * 30; // 30분
     private final long refreshExpire = 1000 * 60 * 60 * 24 * 14; // 2주
 
-    public void init() {
-//        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-//        this.key = String.valueOf(Keys.hmacShaKeyFor(keyBytes));
-        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+    public JwtProvider(@Value("${jwt.secret}") String secretKey){
+        this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
     }
+
     @Deprecated
     public TokenDto generateToken(String uid, String role){
 
@@ -43,7 +42,7 @@ public class JwtProvider {  // 토큰 인증 및 검증
         String accessToken = Jwts.builder()
                 .setClaims(claims)                                      // payload "role": "ROLE_USER"
                 .setExpiration(new Date(now.getTime() + accessExpire))  // payload "exp" : 14234532(예시)
-                .signWith(SignatureAlgorithm.HS256, secretKey)                 // header  "alg" : "HS256"
+                .signWith(SignatureAlgorithm.HS256, key)                 // header  "alg" : "HS256"
                 .compact();
 
         String refreshToken = refreshToken(uid);
@@ -63,14 +62,14 @@ public class JwtProvider {  // 토큰 인증 및 검증
         return Jwts.builder()
                 .setSubject(uid)
                 .setExpiration(new Date(now.getTime() + refreshExpire))
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith(SignatureAlgorithm.HS256, key)
                 .compact();
     }
 
     public boolean verifyToken(String token){
         try {
             Jws<Claims> claims = Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
+                    .setSigningKey(key)
                     .build().parseClaimsJws(token);
 
             return claims.getBody()
@@ -105,7 +104,7 @@ public class JwtProvider {  // 토큰 인증 및 검증
 
     public Claims parseClaims(String token){
         try {
-            return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
 
         }catch (ExpiredJwtException e){
             return e.getClaims();

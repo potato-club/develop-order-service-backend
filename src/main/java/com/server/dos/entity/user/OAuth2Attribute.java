@@ -1,4 +1,4 @@
-package com.server.dos.domain.user;
+package com.server.dos.entity.user;
 
 import lombok.AccessLevel;
 import lombok.Builder;

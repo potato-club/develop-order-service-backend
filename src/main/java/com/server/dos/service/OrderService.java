@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.server.dos.Enum.OrderState.*;
@@ -158,5 +159,13 @@ public class OrderService {
         final int end = Math.min((start + pageable.getPageSize()), detailListDtos.size());
 
         return new PageImpl<>(detailListDtos.subList(start, end), pageable, detailListDtos.size());
+    }
+
+    public Boolean checkSiteNameDuplicate(String siteName) {
+        Optional<Order> order = orderRepository.findBySiteName(siteName);
+        if(order.isEmpty()) {
+            return false;
+        }
+        return true;
     }
 }

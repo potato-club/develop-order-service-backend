@@ -43,6 +43,12 @@ public class OrderController {
         return ResponseEntity.ok(orderDetail);
     }
 
+    @Operation(summary = "사이트 제목 중복 체크")
+    @GetMapping("/{siteName}/exists")
+    public ResponseEntity<Boolean> checkSiteNameDuplicate(@PathVariable String siteName) {
+        return ResponseEntity.ok(orderService.checkSiteNameDuplicate(siteName));
+    }
+
     @Operation(summary = "발주 신청")
     @PostMapping("")
     public ResponseEntity<String> createOrder(@RequestPart(value = "files", required = false) List<MultipartFile> files,

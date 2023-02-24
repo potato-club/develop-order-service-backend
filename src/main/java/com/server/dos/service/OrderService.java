@@ -36,7 +36,7 @@ public class OrderService {
     private final OrderFileRepository fileRepository;
     private final OrderDetailRepository detailRepository;
     private final OrderImageRepository imageRepository;
-    private final S3Service uploadService;
+    private final com.server.dos.service.S3Service uploadService;
 
     @Transactional
     public List<OrderResponseDto> getAllOrder() {

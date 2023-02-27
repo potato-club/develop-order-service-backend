@@ -30,14 +30,20 @@ public class SecurityConfig {
                 .formLogin().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
+                .authorizeRequests()
+                .antMatchers("/","/css/**","/images/**","/js/**","/h2-console/**").permitAll()   // antMatchers : 권한 관리 대상 지정
+                .anyRequest().authenticated()   // 나머지 URL들은 모두 인증된 사용자(로그인한 사용자)에게만 허용
+                .and()
+                .logout().logoutSuccessUrl("/")
+                .and()
                 .addFilterBefore(new JwtAuthFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login()
-                .defaultSuccessUrl("/login-success")        // oauth2 인증 성공 시 이동되는 url
+                .defaultSuccessUrl("/")        // oauth2 인증 성공 시 이동되는 url
                 .successHandler(oAuth2SuccessHandler)     // 인증 프로세스에 따라 사용자 정의 로직 실행
                 .userInfoEndpoint()
                 .userService(customOAuth2UserService);  // 로그인이 성공하면 해당 유저의 정보를 갖고 customOAuth2UserService에서 후처리를 함
 
-            http.addFilterBefore(new JwtAuthFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new JwtAuthFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

@@ -1,9 +1,9 @@
 package com.server.dos;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.server.dos.config.jwt.JwtProvider;
 import com.server.dos.dto.TokenDto;
 import com.server.dos.dto.UserDto;
+import com.server.dos.mapper.UserOauthMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -22,8 +22,7 @@ import java.io.IOException;
 @Component
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 //    private final TokenService tokenService;
-    private final UserRequestMapper userRequestMapper;
-    private final ObjectMapper objectMapper;
+    private final UserOauthMapper userRequestMapper;
     private final JwtProvider jwtProvider;
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)

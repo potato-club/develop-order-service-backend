@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
@@ -65,6 +66,7 @@ public class JwtProvider {  // 토큰 인증 및 검증
                 .signWith(SignatureAlgorithm.HS256, key)
                 .compact();
     }
+
 
     public boolean verifyToken(String token){
         try {

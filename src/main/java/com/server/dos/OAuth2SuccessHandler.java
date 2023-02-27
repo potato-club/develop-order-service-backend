@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.ServletException;
@@ -20,6 +21,7 @@ import java.io.IOException;
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@CrossOrigin(origins = "*" , exposedHeaders = "**")
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 //    private final TokenService tokenService;
     private final UserOauthMapper userRequestMapper;
@@ -38,7 +40,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         log.info("토큰 발행 시작");
 
         TokenDto token = jwtProvider.generateToken(userDto.getEmail(),"USER");
-        log.info("{}",token);
+
 
         tagUrl = UriComponentsBuilder.fromUriString("/home")
                 .queryParam("token","token")

@@ -23,6 +23,7 @@ import java.io.IOException;
 @Component
 @CrossOrigin(origins = "*" , exposedHeaders = "**")
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+//    private final TokenService tokenService;
     private final UserOauthMapper userRequestMapper;
     private final JwtProvider jwtProvider;
     @Override

@@ -23,6 +23,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Component
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+//    private final TokenService tokenService;
     private final UserOauthMapper userRequestMapper;
     private final JwtProvider jwtProvider;
 //    private final ObjectMapper objectMapper;

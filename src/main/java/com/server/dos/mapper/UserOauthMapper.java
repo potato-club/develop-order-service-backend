@@ -9,8 +9,9 @@ public class UserOauthMapper {
     public UserDto getUser(OAuth2User oAuth2User){
         var attributes = oAuth2User.getAttributes();
         return UserDto.builder()
-                .name((String) attributes.get("name"))
+                .nickname((String) attributes.get("nickname"))
                 .email((String) attributes.get("email"))
+                .picture((String) attributes.get("picture"))
                 .build();
     }
 }

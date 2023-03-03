@@ -35,12 +35,11 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         OAuth2Attribute oAuth2Attribute = OAuth2Attribute.of(registrationId,userNameAttributeName,oAuth2User.getAttributes());
 
-        var memberAttributes = oAuth2Attribute.convertToMap();
-        log.info("memberAttribute: "+ memberAttributes );
+//        var memberAttributes = oAuth2Attribute.convertToMap();
         // memberAttribute: {nickname=카카오 이름, id=id, key=id, email=카카오 이메일}
 
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
-                memberAttributes,"email");
+                oAuth2Attribute.getAttributes(),"email");
     }
 }

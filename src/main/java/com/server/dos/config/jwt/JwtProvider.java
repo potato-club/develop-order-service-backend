@@ -14,7 +14,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,7 +31,6 @@ public class JwtProvider {  // 토큰 인증 및 검증
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
     }
 
-    @Deprecated
     public TokenDto generateToken(String uid, String role){
 
         Claims claims = Jwts.claims().setSubject(uid); // sub(subject) : 토큰제목
@@ -57,7 +55,6 @@ public class JwtProvider {  // 토큰 인증 및 검증
                 .build();
     }
 
-    @Deprecated
     public String refreshToken(String uid){
         Date now = new Date();
         return Jwts.builder()

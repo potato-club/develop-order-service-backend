@@ -1,5 +1,6 @@
 package com.server.dos.dto;
 
+import com.server.dos.Enum.OrderState;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -17,4 +18,5 @@ public class OrderDetailDto {
     private Boolean database;
     private Boolean login;
     private Integer page;
+    private OrderState state;
 }

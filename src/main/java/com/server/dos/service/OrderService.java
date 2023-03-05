@@ -54,16 +54,17 @@ public class OrderService {
     // 로그인 구현 후 my order 가져오기도 추가
     @Transactional
     public Page<OrderDetailListDto> getOrderDetailList(String state, int page) {
-        List<OrderDetail> details;
+        Page<OrderDetail> detailPaging;
+        PageRequest pageRequest = PageRequest.of(page - 1, 4, Sort.by(Sort.Direction.DESC, "id"));
         if (state.equals("complete")) {
-            details = detailRepository.findOrderDetailsByStateOrderByIdDesc(COMPLETE);
+            detailPaging = detailRepository.findOrderDetailsByStateOrderByIdDesc(COMPLETE, pageRequest);
         } else {
-            details = detailRepository.findOrderDetailsByStateOrderByIdDesc(WORKING);
+            detailPaging = detailRepository.findOrderDetailsByStateOrderByIdDesc(WORKING, pageRequest);
         }
-        List<OrderDetailListDto> detailListDtos = details.stream().map(INSTANCE::toDetailListDto)
-                .map(dto -> addThumbnail(dto)).collect(Collectors.toList());
+        Page<OrderDetailListDto> detailDtoPaging = detailPaging.map(INSTANCE::toDetailListDto)
+                .map(dto -> addThumbnail(dto));
 
-        return listPaging(page, detailListDtos);
+        return detailDtoPaging;
     }
 
     // 메인 페이지 OrderList 정보 가져오기 (완료된 발주 중 좋아요 높은 순 3개)
@@ -150,15 +151,6 @@ public class OrderService {
                 .orderDetail(detail)
                 .build();
         return imageRepository.save(orderImage);
-    }
-
-    private Page<OrderDetailListDto> listPaging(int page, List<OrderDetailListDto> detailListDtos) {
-        Pageable pageable = PageRequest.of(page - 1, 4);
-
-        final int start = (int) pageable.getOffset();
-        final int end = Math.min((start + pageable.getPageSize()), detailListDtos.size());
-
-        return new PageImpl<>(detailListDtos.subList(start, end), pageable, detailListDtos.size());
     }
 
     public Boolean checkSiteNameDuplicate(String siteName) {

@@ -1,6 +1,9 @@
-package com.server.dos.config;
+package com.server.dos.service;
 
 import com.server.dos.entity.user.OAuth2Attribute;
+import com.server.dos.entity.user.User;
+import com.server.dos.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -14,8 +17,11 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 
 @Slf4j
+@RequiredArgsConstructor
 @Service
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+    private final UserRepository userRepository;
+
 
     //사용자 정보를 요청할 수 있는 access token을 얻고나서 실행
     @Override
@@ -34,12 +40,21 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         log.info("userNameAttributeName: " + userNameAttributeName);
 
         OAuth2Attribute oAuth2Attribute = OAuth2Attribute.of(registrationId,userNameAttributeName,oAuth2User.getAttributes());
+        User user = saveOrUpdate(oAuth2Attribute);
 
 //        var memberAttributes = oAuth2Attribute.convertToMap();
         // memberAttribute: {nickname=카카오 이름, id=id, key=id, email=카카오 이메일}
 
         return new DefaultOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
-                oAuth2Attribute.getAttributes(),"email");
+                Collections.singleton(new SimpleGrantedAuthority(user.getRoleKey())),
+                oAuth2Attribute.getAttributes(),oAuth2Attribute.getAttributeKey());
+    }
+
+    public User saveOrUpdate(OAuth2Attribute oAuth2Attribute){
+        User user = userRepository.findByEmail(oAuth2Attribute.getEmail())
+                .map(entity->entity.update(oAuth2Attribute.getName(),oAuth2Attribute.getPicture()))
+                .orElse(oAuth2Attribute.toEntity());
+
+        return userRepository.save(user);
     }
 }

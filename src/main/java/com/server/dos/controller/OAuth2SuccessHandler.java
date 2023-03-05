@@ -1,7 +1,6 @@
-package com.server.dos;
+package com.server.dos.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.server.dos.config.CustomOAuth2UserService;
+
 import com.server.dos.config.jwt.JwtProvider;
 import com.server.dos.dto.TokenDto;
 import com.server.dos.dto.UserDto;
@@ -23,12 +22,9 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Component
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
-//    private final TokenService tokenService;
     private final UserOauthMapper userRequestMapper;
     private final JwtProvider jwtProvider;
-//    private final ObjectMapper objectMapper;
 
-    private final CustomOAuth2UserService userService;
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
@@ -38,17 +34,20 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         UserDto userDto = userRequestMapper.getUser(oAuth2User);
 
         log.info("Principal에서 꺼낸 OAuth2User = {}",oAuth2User);
+        log.info("kakao name(handler) : "+oAuth2User.getAttributes().get("name"));
         log.info("UserDto: " + userDto);
 
 
         String tagUrl;
         log.info("토큰 발행 시작");
 
-        TokenDto token = jwtProvider.generateToken(userDto.getEmail(),"USER");
+        TokenDto token = jwtProvider.generateToken(userDto.getEmail(),"USER",userDto.getName());
+        jwtProvider.sendAccessAndRefreshToken(response,token.getAccessToken(),token.getRefreshToken());
 
         tagUrl = UriComponentsBuilder.fromUriString("/home")
-                .queryParam("token",token)
+                .queryParam("token","token")
                         .build().toUriString();
+
 
         getRedirectStrategy().sendRedirect(request,response,tagUrl);
 

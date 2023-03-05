@@ -1,8 +1,9 @@
 package com.server.dos.config;
 
-import com.server.dos.OAuth2SuccessHandler;
+import com.server.dos.controller.OAuth2SuccessHandler;
 import com.server.dos.config.jwt.JwtAuthFilter;
 import com.server.dos.config.jwt.JwtProvider;
+import com.server.dos.service.CustomOAuth2UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

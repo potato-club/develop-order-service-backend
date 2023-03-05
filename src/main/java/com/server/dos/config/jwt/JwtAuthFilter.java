@@ -17,8 +17,9 @@ public class JwtAuthFilter extends GenericFilter {  // 토큰 인증 처리
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        String token = ((HttpServletRequest)request).getHeader("Authorization");
+        String token = ((HttpServletRequest) request).getHeader("Authorization");
         log.info("jwt filter에서 token: "+token);
+        log.info("verifyToken value: " + jwtProvider.verifyToken(token));
 
         if(token != null && jwtProvider.verifyToken(token)){
             log.info("들어옴");

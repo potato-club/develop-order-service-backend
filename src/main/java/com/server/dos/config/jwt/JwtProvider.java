@@ -14,6 +14,9 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,17 +34,18 @@ public class JwtProvider {  // 토큰 인증 및 검증
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
     }
 
-    public TokenDto generateToken(String uid, String role){
+    public TokenDto generateToken(String uid, String role,String nickname){
 
         Claims claims = Jwts.claims().setSubject(uid); // sub(subject) : 토큰제목
         claims.put("role",role);
+        claims.put("name",nickname);
 
         Date now = new Date();
 
         String accessToken = Jwts.builder()
                 .setClaims(claims)                                      // payload "role": "ROLE_USER"
                 .setExpiration(new Date(now.getTime() + accessExpire))  // payload "exp" : 14234532(예시)
-                .signWith(SignatureAlgorithm.HS256, key)                 // header  "alg" : "HS256"
+                .signWith(key)                 // header  "alg" : "HS256"
                 .compact();
 
         String refreshToken = refreshToken(uid);
@@ -55,12 +59,13 @@ public class JwtProvider {  // 토큰 인증 및 검증
                 .build();
     }
 
+
     public String refreshToken(String uid){
         Date now = new Date();
         return Jwts.builder()
                 .setSubject(uid)
                 .setExpiration(new Date(now.getTime() + refreshExpire))
-                .signWith(SignatureAlgorithm.HS256, key)
+                .signWith(key)
                 .compact();
     }
 
@@ -74,7 +79,7 @@ public class JwtProvider {  // 토큰 인증 및 검증
             return claims.getBody()
                     .getExpiration()
                     .after(new Date());
-        } catch (Exception e) {
+        }catch (Exception e) {
             return false;
         }
     }
@@ -86,13 +91,13 @@ public class JwtProvider {  // 토큰 인증 및 검증
         Claims claims = parseClaims(token);
         log.info("claims: "+ claims);
 
-        if(claims.get("auth") == null){
+        if(claims.get("Authorization") == null){
             throw new RuntimeException("Not Authorization");
         }
 
         // 클레임에서 권한 정보 가져오기
         Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get("auth").toString().split(","))
+                Arrays.stream(claims.get("Authorization").toString().split(","))
                         .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 
         log.info("authorities: " + authorities);
@@ -110,4 +115,12 @@ public class JwtProvider {  // 토큰 인증 및 검증
         }
     }
 
+    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) throws IOException {
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setHeader("Authorization",accessToken);
+        response.setHeader("Authorization-refresh",refreshToken);
+
+        log.info("Header 설정 완료");
+
+    }
 }

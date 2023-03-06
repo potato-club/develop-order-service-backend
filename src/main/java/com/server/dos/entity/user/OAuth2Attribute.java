@@ -1,27 +1,36 @@
 package com.server.dos.entity.user;
 
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+
+
 import java.util.Map;
 
-@ToString
-@Builder(access = AccessLevel.PRIVATE)
+
+@Slf4j
 @Getter
 public class OAuth2Attribute {
 
     private Map<String,Object> attributes;
     private String attributeKey;
     private String email;
-    private String nickname;
+    private String name;
 
     private String picture;
 
+    @Builder
+    public OAuth2Attribute(Map<String,Object> attributes,String attributeKey,String email,String name,String picture){
+        this.attributes = attributes;
+        this.attributeKey = attributeKey;
+        this.email = email;
+        this.name = name;
+        this.picture = picture;
+    }
     public static OAuth2Attribute of(String provider, String attributeKey, Map<String, Object> attributes){
         switch (provider){
             case "kakao":
-                return ofKakao(attributeKey,attributes);
+                return ofKakao("email",attributes);
             case "google":
                 return ofGoogle(attributeKey,attributes);
             default:
@@ -33,26 +42,38 @@ public class OAuth2Attribute {
         Map<String,Object> kakaoProfile = (Map<String,Object>)kakaoAccount.get("profile");
 
         return OAuth2Attribute.builder()
-                .nickname((String)kakaoProfile.get("nickname"))
+                .name((String)kakaoProfile.get("nickname"))
                 .email((String) kakaoAccount.get("email"))
                 .picture((String)kakaoProfile.get("profile_image_url"))
-                .attributes(attributes)
+                .attributes(kakaoAccount)
                 .attributeKey(attributeKey)
                 .build();
     }
     private static OAuth2Attribute ofGoogle(String attributeKey, Map<String,Object> attributes){
 
         return OAuth2Attribute.builder()
-                .nickname((String)attributes.get("name"))
+                .name((String)attributes.get("name"))
                 .email((String) attributes.get("email"))
                 .picture((String) attributes.get("picture"))
+                .attributes(attributes)
                 .attributeKey(attributeKey)
                 .build();
     }
     public User toEntity(){
         return User.builder()
-                .nickname(nickname)
+                .name(name)
                 .email(email)
+                .picture(picture)
+                .role(Role.GUEST)
                 .build();
     }
+//    public Map<String,Object> convertToMap(){
+//        Map<String,Object> map = new HashMap<>();
+//        map.put("id",attributeKey);
+//        map.put("key",attributeKey);
+//        map.put("email",email);
+//        map.put("nickname",nickname);
+//        map.put("picture",picture);
+//        return map;
+//    }
 }

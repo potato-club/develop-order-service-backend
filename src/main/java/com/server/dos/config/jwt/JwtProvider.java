@@ -118,7 +118,7 @@ public class JwtProvider {  // 토큰 인증 및 검증
     public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) throws IOException {
         response.setStatus(HttpServletResponse.SC_OK);
         response.setHeader("Authorization",accessToken);
-        response.setHeader("Authorization-refresh",refreshToken);
+        response.setHeader("Refresh",refreshToken);
 
         log.info("Header 설정 완료");
 

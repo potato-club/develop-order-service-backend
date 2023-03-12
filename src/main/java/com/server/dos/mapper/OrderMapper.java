@@ -2,6 +2,7 @@ package com.server.dos.mapper;
 
 import com.server.dos.dto.OrderDetailDto;
 import com.server.dos.dto.OrderDetailListDto;
+import com.server.dos.dto.OrderMeetingDto;
 import com.server.dos.dto.OrderResponseDto;
 import com.server.dos.entity.Order;
 import com.server.dos.entity.OrderDetail;
@@ -14,6 +15,9 @@ public interface OrderMapper {
     OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
     OrderResponseDto toResponse(Order order);
+
+    @Mapping(source = "client.clientName", target = "name")
+    OrderMeetingDto toMeeting(Order order);
 
     @Mapping(source = "order.siteName", target = "siteName")
     @Mapping(source = "order.purpose", target = "purpose")

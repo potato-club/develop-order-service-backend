@@ -34,18 +34,18 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         UserDto userDto = userRequestMapper.getUser(oAuth2User);
 
         log.info("Principal에서 꺼낸 OAuth2User = {}",oAuth2User);
-        log.info("kakao name(handler) : "+oAuth2User.getAttributes().get("name"));
         log.info("UserDto: " + userDto);
 
 
         String tagUrl;
         log.info("토큰 발행 시작");
 
-        TokenDto token = jwtProvider.generateToken(userDto.getEmail(),"USER",userDto.getName());
-        jwtProvider.sendAccessAndRefreshToken(response,token.getAccessToken(),token.getRefreshToken());
+        TokenDto token = jwtProvider.generateToken(userDto.getEmail(),"USER");
+//        jwtProvider.sendAccessAndRefreshToken(response,token.getAccessToken(),token.getRefreshToken());
 
-        tagUrl = UriComponentsBuilder.fromUriString("/home")
-                .queryParam("token","token")
+        tagUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/login/")
+                .queryParam("accesstoken",token.getAccessToken())
+                .queryParam("refresh",token.getRefreshToken())
                         .build().toUriString();
 
 

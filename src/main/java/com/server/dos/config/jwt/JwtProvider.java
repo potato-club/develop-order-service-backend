@@ -15,8 +15,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,11 +32,10 @@ public class JwtProvider {  // 토큰 인증 및 검증
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
     }
 
-    public TokenDto generateToken(String uid, String role,String nickname){
+    public TokenDto generateToken(String uid, String role){
 
         Claims claims = Jwts.claims().setSubject(uid); // sub(subject) : 토큰제목
         claims.put("role",role);
-        claims.put("name",nickname);
 
         Date now = new Date();
 
@@ -115,12 +112,16 @@ public class JwtProvider {  // 토큰 인증 및 검증
         }
     }
 
-    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) throws IOException {
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setHeader("Authorization",accessToken);
-        response.setHeader("Refresh",refreshToken);
-
-        log.info("Header 설정 완료");
-
+    public String getUid(String token){
+        return Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody().getSubject();
     }
+
+//    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) throws IOException {
+//        response.setStatus(HttpServletResponse.SC_OK);
+//        response.setHeader("Authorization",accessToken);
+//        response.setHeader("Refresh",refreshToken);
+//
+//        log.info("Header 설정 완료");
+//
+//    }
 }

@@ -40,11 +40,12 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String tagUrl;
         log.info("토큰 발행 시작");
 
-        TokenDto token = jwtProvider.generateToken(userDto.getEmail(),"USER",userDto.getName());
-        jwtProvider.sendAccessAndRefreshToken(response,token.getAccessToken(),token.getRefreshToken());
+        TokenDto token = jwtProvider.generateToken(userDto.getEmail(),"USER");
+//        jwtProvider.sendAccessAndRefreshToken(response,token.getAccessToken(),token.getRefreshToken());
 
         tagUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/login/")
-                .queryParam("token","token")
+                .queryParam("accesstoken",token.getAccessToken())
+                .queryParam("refresh",token.getRefreshToken())
                         .build().toUriString();
 
 

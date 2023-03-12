@@ -27,6 +27,13 @@ public class OrderController {
         return ResponseEntity.ok(allOrder);
     }
 
+    @Operation(summary = "모든 미팅 시간 반환")
+    @GetMapping("/meeting")
+    public ResponseEntity<List<MeetingDateDto>> getOrdersMeetingList() {
+        List<MeetingDateDto> allMeeting = orderService.getAllOrderMeeting();
+        return ResponseEntity.ok(allMeeting);
+    }
+
     @Operation(summary = "발주 디테일 리스트 반환")
     @GetMapping("/detail")
     public ResponseEntity<Page<OrderDetailListDto>> getOrderDetailList(

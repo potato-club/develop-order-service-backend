@@ -59,7 +59,7 @@ public class Order extends BaseTimeEntity{
     @OneToMany(mappedBy = "order", orphanRemoval = true)
     private List<OrderFile> orderFiles = new ArrayList<>();
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private LocalDateTime meeting;
 
     @Column

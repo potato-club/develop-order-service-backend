@@ -14,6 +14,7 @@ import com.server.dos.repository.OrderImageRepository;
 import com.server.dos.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -45,6 +46,12 @@ public class OrderService {
     }
 
     @Transactional
+    public List<MeetingDateDto> getAllOrderMeeting() {
+        List<Order> all = orderRepository.findAll();
+        return all.stream().map(INSTANCE::toMeeting).map(MeetingDateDto::new).collect(Collectors.toList());
+    }
+
+    @Transactional
     public OrderDetailDto getOrderDetail(Long orderId) {
         OrderDetail detail = detailRepository.findById(orderId)
                 .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist."));
@@ -68,11 +75,18 @@ public class OrderService {
     }
 
     // 메인 페이지 OrderList 정보 가져오기 (완료된 발주 중 좋아요 높은 순 3개)
-    @Transactional
-    public List<OrderMainDto> getMainOrders() {
-        return null;
-    }
+//    @Transactional
+//    public List<OrderMainDto> getMainOrders() {
+//        return null;
+//    }
 
+    // OrderDetail 좋아요 추가
+//    @Transactional
+//    public String orderLike(Long orderId) {
+//        OrderDetail detail = detailRepository.findById(orderId)
+//                .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist."));
+//
+//    }
 
     @Transactional
     public OrderDetailListDto addThumbnail(OrderDetailListDto dto) {
@@ -88,7 +102,15 @@ public class OrderService {
 
     @Transactional
     public void createOrder(List<MultipartFile> files, OrderRequestDto orderDto) {
-        Order order = orderRepository.save(orderDto.toEntity());
+        Order order;
+        if(orderRepository.findBySiteName(orderDto.getSiteName()).isPresent()) {
+            throw new OrderException(ErrorCode.CONFLICT, "이미 존재하는 sitename 입니다");
+        }
+        try {
+            order = orderRepository.save(orderDto.toEntity());
+        } catch (DataIntegrityViolationException ex) {
+            throw new OrderException(ErrorCode.CONFLICT, "Meeting 시간 중복입니다.");
+        }
 
         if(files != null) {
             files.stream()
@@ -101,6 +123,7 @@ public class OrderService {
                 .id(order.getId())
                 .state(WORKING)
                 .order(order)
+                .likes(0)
                 .build();
 
         detailRepository.save(detail);

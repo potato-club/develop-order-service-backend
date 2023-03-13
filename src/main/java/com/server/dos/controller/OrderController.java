@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Api(tags = "발주 관련 API")
@@ -25,6 +26,13 @@ public class OrderController {
     public ResponseEntity<List<OrderResponseDto>> getAllOrder() {
         List<OrderResponseDto> allOrder = orderService.getAllOrder();
         return ResponseEntity.ok(allOrder);
+    }
+
+    @Operation(summary = "메인 페이지 발주 리스트 반환")
+    @GetMapping("/main")
+    public ResponseEntity<List<OrderMainDto>> getMainOrderDetailList() {
+        List<OrderMainDto> mainOrders = orderService.getMainOrders();
+        return ResponseEntity.ok(mainOrders);
     }
 
     @Operation(summary = "모든 미팅 시간 반환")
@@ -62,6 +70,14 @@ public class OrderController {
                                               @RequestPart(value = "orderDto") OrderRequestDto orderDto) {
         orderService.createOrder(files, orderDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("발주 성공");
+    }
+
+    @Operation(summary = "게시글 추천/취소")
+    @PostMapping("/detail/{orderId}/likes")
+    public ResponseEntity<String> likeOrderDetail(HttpServletRequest request,
+                                                  @PathVariable(name = "orderId") Long orderId) {
+        String res = orderService.orderLike(request, orderId);
+        return ResponseEntity.ok(res);
     }
 
     @Operation(summary = "발주 디테일 수정")

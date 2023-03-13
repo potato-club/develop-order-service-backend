@@ -32,6 +32,7 @@ public class OrderDetail extends BaseTimeEntity {
     private List<OrderImage> images = new ArrayList<>();
     private Double rating;
     private LocalDateTime completedDate;
+    private int likes;
 
     @OneToOne
     @JoinColumn(name = "orders_id")
@@ -42,5 +43,9 @@ public class OrderDetail extends BaseTimeEntity {
         if(requestDto.getCompletedDate() != null) this.completedDate = requestDto.getCompletedDate();
         if(requestDto.getRating() != null) this.rating = requestDto.getRating();
         this.order.update(requestDto);
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
     }
 }

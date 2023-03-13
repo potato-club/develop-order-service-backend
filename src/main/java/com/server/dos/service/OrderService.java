@@ -1,17 +1,14 @@
 package com.server.dos.service;
 
+import com.server.dos.Enum.OrderState;
+import com.server.dos.config.jwt.JwtProvider;
 import com.server.dos.dto.*;
-import com.server.dos.entity.OrderImage;
-import com.server.dos.entity.Order;
-import com.server.dos.entity.OrderDetail;
-import com.server.dos.entity.OrderFile;
+import com.server.dos.entity.*;
+import com.server.dos.entity.user.User;
 import com.server.dos.exception.custom.OrderException;
 import com.server.dos.exception.error.ErrorCode;
 import com.server.dos.mapper.ImageMapper;
-import com.server.dos.repository.OrderDetailRepository;
-import com.server.dos.repository.OrderFileRepository;
-import com.server.dos.repository.OrderImageRepository;
-import com.server.dos.repository.OrderRepository;
+import com.server.dos.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
@@ -34,10 +32,13 @@ import static com.server.dos.mapper.OrderMapper.INSTANCE;
 @Slf4j
 public class OrderService {
     private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
     private final OrderFileRepository fileRepository;
     private final OrderDetailRepository detailRepository;
+    private final OrderLikeRepository likeRepository;
     private final OrderImageRepository imageRepository;
     private final S3Service uploadService;
+    private final JwtProvider jwtProvider;
 
     @Transactional
     public List<OrderResponseDto> getAllOrder() {
@@ -75,18 +76,33 @@ public class OrderService {
     }
 
     // 메인 페이지 OrderList 정보 가져오기 (완료된 발주 중 좋아요 높은 순 3개)
-//    @Transactional
-//    public List<OrderMainDto> getMainOrders() {
-//        return null;
-//    }
+    @Transactional
+    public List<OrderMainDto> getMainOrders() {
+        List<OrderDetail> details = detailRepository.findTop5ByOrderByLikesDesc();
+        return details.stream().filter(o -> o.getState().equals(COMPLETE)).map(INSTANCE::toDetailListDto)
+                .map(dto -> addThumbnail(dto))
+                .map(OrderMainDto::new)
+                .collect(Collectors.toList());
+    }
 
     // OrderDetail 좋아요 추가
-//    @Transactional
-//    public String orderLike(Long orderId) {
-//        OrderDetail detail = detailRepository.findById(orderId)
-//                .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist."));
-//
-//    }
+    @Transactional
+    public String orderLike(HttpServletRequest request, Long orderId) {
+        OrderDetail detail = detailRepository.findById(orderId)
+                .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist."));
+        User user = userRepository.findByEmail(jwtProvider.getUid(request.getHeader("Authorization"))).get();
+        OrderLike like = likeRepository.findByOrderDetailAndUser(detail, user);
+        if(like == null) {
+            detail.setLikes(detail.getLikes() + 1);
+            OrderLike orderLike = new OrderLike(detail, user);
+            likeRepository.save(orderLike);
+            return "좋아요 완료";
+        } else {
+            like.unLikeOrder(detail);
+            likeRepository.delete(like);
+            return "좋아요 취소";
+        }
+    }
 
     @Transactional
     public OrderDetailListDto addThumbnail(OrderDetailListDto dto) {

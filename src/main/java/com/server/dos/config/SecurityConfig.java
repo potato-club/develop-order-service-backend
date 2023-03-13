@@ -36,7 +36,7 @@ public class SecurityConfig {
                 .and()
                 .logout().logoutSuccessUrl("/")
                 .and()
-                .oauth2Login().loginPage("")
+                .oauth2Login().loginPage("/")
                 .defaultSuccessUrl("/")        // oauth2 인증 성공 시 이동되는 url
                 .successHandler(oAuth2SuccessHandler)     // 인증 프로세스에 따라 사용자 정의 로직 실행
                 .userInfoEndpoint()        //OAuth 2 로그인 성공 이후 사용자 정보를 가져올 때의 설정등을 담당

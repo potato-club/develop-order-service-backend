@@ -2,6 +2,8 @@ package com.server.dos.controller;
 
 import com.server.dos.config.jwt.JwtProvider;
 import com.server.dos.dto.TokenDto;
+import com.server.dos.exception.custom.TokenException;
+import com.server.dos.exception.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,11 +15,11 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 public class TokenController {
 
-    private JwtProvider jwtProvider;
+    private final JwtProvider jwtProvider;
 
     @GetMapping("/token/expired")
     public String auth(){
-        throw new RuntimeException();
+        throw new TokenException(ErrorCode.UNAUTHORIZED,"토큰이 만료되었습니다.");
     }
 
     @GetMapping("/token/refresh")
@@ -32,9 +34,17 @@ public class TokenController {
             response.addHeader("Refresh", newToken.getRefreshToken());
             response.setContentType("application/json;charset=UTF-8");
 
+
+//            String tagUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/login/")
+//                    .queryParam("accesstoken",newToken.getAccessToken())
+//                    .queryParam("refresh",newToken.getRefreshToken())
+//                    .build().toUriString();
+//
+//
+//            getRedirectStrategy().sendRedirect(request,response,tagUrl);
             return "NEW TOKEN";
         }
 
-        throw new RuntimeException();
+        throw new TokenException(ErrorCode.UNAUTHORIZED,"토큰 재발급에 실패하였습니다.");
     }
 }

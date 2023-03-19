@@ -1,6 +1,7 @@
 package com.server.dos.exception;
 
 import com.server.dos.exception.custom.OrderException;
+import com.server.dos.exception.custom.TokenException;
 import com.server.dos.exception.error.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,5 +24,12 @@ public class ErrorExceptionHandler {
         log.error("Meeting Exception", ex);
         ErrorResponse response = new ErrorResponse(ex.getErrorCode().getCode(), ex.getErrorMessage());
         return new ResponseEntity<>(response, ex.getErrorCode().getStatus());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleTokenException(TokenException tx) {
+        log.error("Token Exception", tx);
+        ErrorResponse response = new ErrorResponse(tx.getErrorCode().getCode(), tx.getErrorMessage());
+        return new ResponseEntity<>(response, tx.getErrorCode().getStatus());
     }
 }

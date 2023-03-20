@@ -66,17 +66,18 @@ public class OrderController {
 
     @Operation(summary = "발주 신청")
     @PostMapping("")
-    public ResponseEntity<String> createOrder(@RequestPart(value = "files", required = false) List<MultipartFile> files,
+    public ResponseEntity<String> createOrder(@RequestHeader(value = "Authorization") String token,
+                                              @RequestPart(value = "files", required = false) List<MultipartFile> files,
                                               @RequestPart(value = "orderDto") OrderRequestDto orderDto) {
-        orderService.createOrder(files, orderDto);
+        orderService.createOrder(token, files, orderDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("발주 성공");
     }
 
     @Operation(summary = "게시글 추천/취소")
     @PostMapping("/detail/{orderId}/likes")
-    public ResponseEntity<String> likeOrderDetail(HttpServletRequest request,
+    public ResponseEntity<String> likeOrderDetail(@RequestHeader(value = "Authorization") String token,
                                                   @PathVariable(name = "orderId") Long orderId) {
-        String res = orderService.orderLike(request, orderId);
+        String res = orderService.orderLike(token, orderId);
         return ResponseEntity.ok(res);
     }
 

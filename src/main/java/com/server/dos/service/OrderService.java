@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
@@ -75,7 +74,8 @@ public class OrderService {
         return detailDtoPaging;
     }
 
-    // 메인 페이지 OrderList 정보 가져오기 (완료된 발주 중 좋아요 높은 순 3개)
+    // 메인 페이지 OrderList 정보 가져오기 (완료된 발주 중 좋아요 높은 순 5개)
+    // 추후에 쿼리에서 COMPLETE 가져오게 변경
     @Transactional
     public List<OrderMainDto> getMainOrders() {
         List<OrderDetail> details = detailRepository.findTop5ByOrderByLikesDesc();
@@ -87,10 +87,12 @@ public class OrderService {
 
     // OrderDetail 좋아요 추가
     @Transactional
-    public String orderLike(HttpServletRequest request, Long orderId) {
-        OrderDetail detail = detailRepository.findById(orderId)
-                .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist."));
-        User user = userRepository.findByEmail(jwtProvider.getUid(request.getHeader("Authorization"))).get();
+    public String orderLike(String token, Long orderId) {
+        OrderDetail detail = detailRepository.findCompleteById(orderId);
+        if(detail == null) {
+            throw new OrderException(ErrorCode.BAD_REQUEST, "존재하지 않는 완료된 발주입니다");
+        }
+        User user = userRepository.findByEmail(jwtProvider.getUid(token));
         OrderLike like = likeRepository.findByOrderDetailAndUser(detail, user);
         if(like == null) {
             detail.setLikes(detail.getLikes() + 1);
@@ -117,13 +119,15 @@ public class OrderService {
     }
 
     @Transactional
-    public void createOrder(List<MultipartFile> files, OrderRequestDto orderDto) {
+    public void createOrder(String token, List<MultipartFile> files, OrderRequestDto orderDto) {
         Order order;
         if(orderRepository.findBySiteName(orderDto.getSiteName()).isPresent()) {
             throw new OrderException(ErrorCode.CONFLICT, "이미 존재하는 sitename 입니다");
         }
         try {
-            order = orderRepository.save(orderDto.toEntity());
+            Order o = orderDto.toEntity();
+            o.setUser(userRepository.findByEmail(jwtProvider.getUid(token)));
+            order = orderRepository.save(o);
         } catch (DataIntegrityViolationException ex) {
             throw new OrderException(ErrorCode.CONFLICT, "Meeting 시간 중복입니다.");
         }

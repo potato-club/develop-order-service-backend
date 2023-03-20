@@ -2,6 +2,7 @@ package com.server.dos.entity;
 
 import com.server.dos.Enum.SiteOwner;
 import com.server.dos.dto.OrderDetailRequestDto;
+import com.server.dos.entity.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -59,6 +60,10 @@ public class Order extends BaseTimeEntity{
     @OneToMany(mappedBy = "order", orphanRemoval = true)
     private List<OrderFile> orderFiles = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @Column(nullable = false, unique = true)
     private LocalDateTime meeting;
 
@@ -69,5 +74,9 @@ public class Order extends BaseTimeEntity{
         if(requestDto.getDatabase() != null) this.database = requestDto.getDatabase();
         if(requestDto.getLogin() != null) this.login = requestDto.getLogin();
         if(requestDto.getPage() != null) this.page = requestDto.getPage();
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

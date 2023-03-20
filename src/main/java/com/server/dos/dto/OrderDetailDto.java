@@ -19,4 +19,5 @@ public class OrderDetailDto {
     private Boolean login;
     private Integer page;
     private OrderState state;
+    private int likes;
 }

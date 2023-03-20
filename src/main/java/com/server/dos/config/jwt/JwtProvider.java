@@ -88,13 +88,13 @@ public class JwtProvider {  // 토큰 인증 및 검증
         Claims claims = parseClaims(token);
         log.info("claims: "+ claims);
 
-        if(claims.get("Authorization") == null){
+        if(claims.get("role") == null){
             throw new RuntimeException("Not Authorization");
         }
 
         // 클레임에서 권한 정보 가져오기
         Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get("Authorization").toString().split(","))
+                Arrays.stream(claims.get("role").toString().split(","))
                         .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 
         log.info("authorities: " + authorities);

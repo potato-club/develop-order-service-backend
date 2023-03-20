@@ -12,5 +12,6 @@ public class OrderDetailListDto {
     private LocalDateTime createdDate;
     private LocalDateTime completedDate;
     private Double rating;
+    private int likes;
     private ImageDto thumbnail;
 }

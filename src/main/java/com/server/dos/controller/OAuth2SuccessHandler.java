@@ -34,8 +34,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         UserDto userDto = userRequestMapper.getUser(oAuth2User);
 
         log.info("Principal에서 꺼낸 OAuth2User = {}",oAuth2User);
-        log.info("UserDto: " + userDto);
-
 
         String tagUrl;
         log.info("토큰 발행 시작");

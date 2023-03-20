@@ -4,8 +4,9 @@ import com.server.dos.controller.OAuth2SuccessHandler;
 import com.server.dos.config.jwt.JwtAuthFilter;
 import com.server.dos.config.jwt.JwtProvider;
 import com.server.dos.service.CustomOAuth2UserService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -15,7 +16,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @EnableWebSecurity
 public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
@@ -31,7 +32,10 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/","/css/**","/images/**","/js/**","/h2-console/**").permitAll()   // antMatchers : 권한 관리 대상 지정
+                .antMatchers("/api/doc", "/swagger-ui/*", "/swagger-resources/**",
+                        "/swagger-ui.html",
+                        "/webjars/**", "/v3/api-docs").permitAll()
+                .antMatchers(HttpMethod.GET, "/orders/main", "/orders/detail").permitAll() // antMatchers : 권한 관리 대상 지정
                 .anyRequest().authenticated()   // 나머지 URL들은 모두 인증된 사용자(로그인한 사용자)에게만 허용
                 .and()
                 .logout().logoutSuccessUrl("/")

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -12,12 +13,12 @@ import java.util.Map;
 @Getter
 public class OAuth2Attribute {
 
-    private Map<String,Object> attributes;
-    private String attributeKey;
-    private String email;
-    private String name;
+    private final Map<String,Object>  attributes;
+    private final String attributeKey;
+    private final String email;
+    private final String name;
 
-    private String picture;
+    private final String picture;
 
     @Builder
     public OAuth2Attribute(Map<String,Object> attributes,String attributeKey,String email,String name,String picture){
@@ -64,16 +65,16 @@ public class OAuth2Attribute {
                 .name(name)
                 .email(email)
                 .picture(picture)
-                .role(Role.GUEST)
+                .role(Role.USER)
                 .build();
     }
-//    public Map<String,Object> convertToMap(){
-//        Map<String,Object> map = new HashMap<>();
-//        map.put("id",attributeKey);
-//        map.put("key",attributeKey);
-//        map.put("email",email);
-//        map.put("nickname",nickname);
-//        map.put("picture",picture);
-//        return map;
-//    }
+    public Map<String,Object> convertToMap(){
+        Map<String,Object> map = new HashMap<>();
+        map.put("id",attributeKey);
+        map.put("key",attributeKey);
+        map.put("email",email);
+        map.put("name",name);
+        map.put("picture",picture);
+        return map;
+    }
 }

@@ -33,6 +33,7 @@ public class OrderDetail extends BaseTimeEntity {
     private Double rating;
     private LocalDateTime completedDate;
     private int likes;
+    private Long userId;
 
     @OneToOne
     @JoinColumn(name = "orders_id")
@@ -40,12 +41,19 @@ public class OrderDetail extends BaseTimeEntity {
     private Order order;
 
     public void update(OrderDetailRequestDto requestDto) {
-        if(requestDto.getCompletedDate() != null) this.completedDate = requestDto.getCompletedDate();
-        if(requestDto.getRating() != null) this.rating = requestDto.getRating();
         this.order.update(requestDto);
     }
 
     public void setLikes(int likes) {
         this.likes = likes;
+    }
+
+    public void complete() {
+        this.state = OrderState.COMPLETED;
+        this.completedDate = LocalDateTime.now();
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
     }
 }

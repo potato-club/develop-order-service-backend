@@ -11,10 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-@Api(tags = "발주 관련 API")
+@Api(tags = "발주 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/orders")
@@ -88,6 +87,23 @@ public class OrderController {
                                                     @RequestPart(value = "orderDetail", required = false) OrderDetailRequestDto requestDto) {
         orderService.updateOrderDetail(orderId, images, requestDto);
         return ResponseEntity.ok("업데이트 완료");
+    }
+
+    // 헤더 토큰 받아서 직원 검증처리 로직 추가하기
+    @Operation(summary = "발주 완료 처리")
+    @PutMapping("/detail/{orderId}/complete")
+    public ResponseEntity<String> completeOrderDetail(@PathVariable(name = "orderId") Long orderId) {
+        orderService.completeOrderDetail(orderId);
+        return ResponseEntity.ok("완료 처리되었습니다.");
+    }
+
+    @Operation(summary = "완료된 발주 별점 추가")
+    @PutMapping("/detail/{orderId}/rating")
+    public ResponseEntity<String> addRating(@RequestHeader(value = "Authorization") String token,
+                                            @PathVariable(name = "orderId") Long orderId,
+                                            @RequestBody OrderRatingDto rating) {
+        orderService.addRating(token, orderId, rating);
+        return ResponseEntity.ok("별점 추가 완료");
     }
 
     @Operation(summary = "발주 취소")

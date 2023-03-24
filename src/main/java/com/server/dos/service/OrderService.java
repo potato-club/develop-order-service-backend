@@ -1,6 +1,5 @@
 package com.server.dos.service;
 
-import com.server.dos.Enum.OrderState;
 import com.server.dos.config.jwt.JwtProvider;
 import com.server.dos.dto.*;
 import com.server.dos.entity.*;
@@ -19,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.server.dos.Enum.OrderState.*;
@@ -58,15 +56,14 @@ public class OrderService {
         return INSTANCE.toDetailDto(detail);
     }
 
-    // 로그인 구현 후 my order 가져오기도 추가
     @Transactional
     public Page<OrderDetailListDto> getOrderDetailList(String state, int page) {
         Page<OrderDetail> detailPaging;
         PageRequest pageRequest = PageRequest.of(page - 1, 4, Sort.by(Sort.Direction.DESC, "id"));
         if (state.equals("complete")) {
-            detailPaging = detailRepository.findOrderDetailsByStateOrderByIdDesc(COMPLETE, pageRequest);
+            detailPaging = detailRepository.findCompletedDetails(pageRequest);
         } else {
-            detailPaging = detailRepository.findOrderDetailsByStateOrderByIdDesc(WORKING, pageRequest);
+            detailPaging = detailRepository.findWorkingDetails(pageRequest);
         }
         Page<OrderDetailListDto> detailDtoPaging = detailPaging.map(INSTANCE::toDetailListDto)
                 .map(dto -> addThumbnail(dto));
@@ -74,12 +71,24 @@ public class OrderService {
         return detailDtoPaging;
     }
 
+    @Transactional
+    public Page<OrderDetailListDto> getOrderDetailListByToken(String token, int page) {
+        User user = userRepository.findByEmail(jwtProvider.getUid(token));
+        PageRequest pageRequest = PageRequest.of(page - 1, 4,
+                Sort.by(Sort.Direction.DESC, "state"));
+        Page<OrderDetail> detailPaging =
+                detailRepository.findOrderDetailsByUserIdOrderByIdDesc(user.getId(), pageRequest);
+        Page<OrderDetailListDto> detailDtoPaging = detailPaging.map(INSTANCE::toDetailListDto)
+                .map(dto -> addThumbnail(dto));
+
+        return detailDtoPaging;
+    }
+
     // 메인 페이지 OrderList 정보 가져오기 (완료된 발주 중 좋아요 높은 순 5개)
-    // 추후에 쿼리에서 COMPLETE 가져오게 변경
     @Transactional
     public List<OrderMainDto> getMainOrders() {
         List<OrderDetail> details = detailRepository.findTop5ByOrderByLikesDesc();
-        return details.stream().filter(o -> o.getState().equals(COMPLETE)).map(INSTANCE::toDetailListDto)
+        return details.stream().filter(o -> o.getState().equals(COMPLETED)).map(INSTANCE::toDetailListDto)
                 .map(dto -> addThumbnail(dto))
                 .map(OrderMainDto::new)
                 .collect(Collectors.toList());
@@ -89,10 +98,10 @@ public class OrderService {
     @Transactional
     public String orderLike(String token, Long orderId) {
         OrderDetail detail = detailRepository.findCompleteById(orderId);
-        if(detail == null) {
-            throw new OrderException(ErrorCode.BAD_REQUEST, "존재하지 않는 완료된 발주입니다");
-        }
         User user = userRepository.findByEmail(jwtProvider.getUid(token));
+        if(detail == null) throw new OrderException(ErrorCode.BAD_REQUEST, "존재하지 않는 완료된 발주입니다");
+        if(user.getId() == detail.getUserId()) throw new OrderException(ErrorCode.BAD_REQUEST,
+                "본인의 발주는 추천할 수 없습니다.");
         OrderLike like = likeRepository.findByOrderDetailAndUser(detail, user);
         if(like == null) {
             detail.setLikes(detail.getLikes() + 1);
@@ -121,7 +130,7 @@ public class OrderService {
     @Transactional
     public void createOrder(String token, List<MultipartFile> files, OrderRequestDto orderDto) {
         Order order;
-        if(orderRepository.findBySiteName(orderDto.getSiteName()).isPresent()) {
+        if(orderRepository.findBySiteName(orderDto.getSiteName()) != null) {
             throw new OrderException(ErrorCode.CONFLICT, "이미 존재하는 sitename 입니다");
         }
         try {
@@ -141,9 +150,10 @@ public class OrderService {
 
         OrderDetail detail = OrderDetail.builder()
                 .id(order.getId())
-                .state(WORKING)
+                .state(START)
                 .order(order)
                 .likes(0)
+                .userId(order.getUser().getId())
                 .build();
 
         detailRepository.save(detail);
@@ -153,9 +163,30 @@ public class OrderService {
     public void updateOrderDetail(Long orderId, List<MultipartFile> images, OrderDetailRequestDto requestDto) {
         OrderDetail detail = detailRepository.findById(orderId)
                 .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist."));
-
+        if(detail.getState() == COMPLETED) throw new OrderException(ErrorCode.BAD_REQUEST, "이미 완료된 발주입니다.");
         if (images != null) updateImage(detail, images);
         if (requestDto != null) detail.update(requestDto);
+    }
+
+    @Transactional
+    public void completeOrderDetail(Long orderId) {
+        OrderDetail detail = detailRepository.findById(orderId)
+                .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist."));
+
+        detail.complete();
+    }
+
+    @Transactional
+    public void addRating(String token, Long orderId, OrderRatingDto rating) {
+        User user = userRepository.findByEmail(jwtProvider.getUid(token));
+        OrderDetail detail = detailRepository.findById(orderId)
+                .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist"));
+
+        if(detail.getState() != COMPLETED) throw new OrderException(ErrorCode.BAD_REQUEST, "완료된 발주가 아닙니다.");
+        if(detail.getUserId() != user.getId()) throw new OrderException(ErrorCode.BAD_REQUEST,
+                "발주자만 별점 부여 가능합니다");
+        if(detail.getRating() != null) throw new OrderException(ErrorCode.BAD_REQUEST, "이미 별점이 부여되었습니다.");
+        detail.setRating(rating.getRating());
     }
 
     @Transactional
@@ -197,8 +228,8 @@ public class OrderService {
     }
 
     public Boolean checkSiteNameDuplicate(String siteName) {
-        Optional<Order> order = orderRepository.findBySiteName(siteName);
-        if(order.isEmpty()) {
+        Order order = orderRepository.findBySiteName(siteName);
+        if(order == null) {
             return false;
         }
         return true;

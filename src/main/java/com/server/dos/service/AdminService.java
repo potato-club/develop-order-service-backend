@@ -1,6 +1,7 @@
 package com.server.dos.service;
 
 import com.server.dos.config.jwt.JwtProvider;
+import com.server.dos.dto.AdminLoginDto;
 import com.server.dos.dto.AdminSaveRequestDto;
 import com.server.dos.dto.TokenDto;
 import com.server.dos.entity.user.Admin;
@@ -37,12 +38,12 @@ public class AdminService {
     }
 
     @Transactional
-    public TokenDto loginAdmin(AdminSaveRequestDto requestDto){
-        Admin entity = adminRepository.findByAdminId(requestDto.getAdminId());
+    public TokenDto loginAdmin(AdminLoginDto adminLoginDto){
+        Admin entity = adminRepository.findByAdminId(adminLoginDto.getAdminId());
 
         if(entity == null){
             throw new AdminException(ErrorCode.INTERNAL_SERVER_ERROR,"해당 아이디가 존재하지 않습니다.");
-        }else if(!passwordEncoder.matches(requestDto.getAdminPw(),entity.getAdminPw())){
+        }else if(!passwordEncoder.matches(adminLoginDto.getAdminPw(),entity.getAdminPw())){
             throw new AdminException(ErrorCode.INTERNAL_SERVER_ERROR,"비밀번호가 일치하지 않습니다.");
         }
 

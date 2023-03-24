@@ -1,5 +1,6 @@
 package com.server.dos.controller;
 
+import com.server.dos.dto.AdminLoginDto;
 import com.server.dos.dto.AdminSaveRequestDto;
 import com.server.dos.dto.TokenDto;
 import com.server.dos.service.AdminService;
@@ -23,8 +24,8 @@ public class AdminController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenDto> adminLogin(@RequestBody AdminSaveRequestDto requestDto){
-        TokenDto adminToken = adminService.loginAdmin(requestDto);
+    public ResponseEntity<TokenDto> adminLogin(@RequestBody AdminLoginDto adminLoginDto){
+        TokenDto adminToken = adminService.loginAdmin(adminLoginDto);
         return ResponseEntity.ok(adminToken);
     }
 }

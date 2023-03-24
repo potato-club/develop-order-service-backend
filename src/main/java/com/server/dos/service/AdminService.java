@@ -46,6 +46,6 @@ public class AdminService {
             throw new AdminException(ErrorCode.INTERNAL_SERVER_ERROR,"비밀번호가 일치하지 않습니다.");
         }
 
-        return jwtProvider.generateToken(entity.getAdminEmail(), "ADMIN");
+        return jwtProvider.generateToken(entity.getAdminId(), "ADMIN");
     }
 }

@@ -1,5 +1,6 @@
 package com.server.dos.exception;
 
+import com.server.dos.exception.custom.AdminException;
 import com.server.dos.exception.custom.OrderException;
 import com.server.dos.exception.custom.TokenException;
 import com.server.dos.exception.error.ErrorResponse;
@@ -31,5 +32,12 @@ public class ErrorExceptionHandler {
         log.error("Token Exception", tx);
         ErrorResponse response = new ErrorResponse(tx.getErrorCode().getCode(), tx.getErrorMessage());
         return new ResponseEntity<>(response, tx.getErrorCode().getStatus());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleAdminException(AdminException ax) {
+        log.error("Admin Exception", ax);
+        ErrorResponse response = new ErrorResponse(ax.getErrorCode().getCode(), ax.getErrorMessage());
+        return new ResponseEntity<>(response, ax.getErrorCode().getStatus());
     }
 }

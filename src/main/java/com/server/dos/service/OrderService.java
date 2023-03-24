@@ -1,5 +1,6 @@
 package com.server.dos.service;
 
+import com.server.dos.Enum.OrderState;
 import com.server.dos.config.jwt.JwtProvider;
 import com.server.dos.dto.*;
 import com.server.dos.entity.*;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.server.dos.Enum.OrderState.*;
+import static com.server.dos.entity.user.Role.*;
 import static com.server.dos.mapper.OrderMapper.INSTANCE;
 
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ import static com.server.dos.mapper.OrderMapper.INSTANCE;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final AdminRepository adminRepository;
     private final OrderFileRepository fileRepository;
     private final OrderDetailRepository detailRepository;
     private final OrderLikeRepository likeRepository;
@@ -160,16 +163,22 @@ public class OrderService {
     }
 
     @Transactional
-    public void updateOrderDetail(Long orderId, List<MultipartFile> images, OrderDetailRequestDto requestDto) {
+    public void updateOrderDetail(String token, Long orderId, int key,
+                                  List<MultipartFile> images, OrderDetailRequestDto requestDto) {
+        // token 으로 role 이 직원인지 검증 로직 추가
         OrderDetail detail = detailRepository.findById(orderId)
                 .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist."));
         if(detail.getState() == COMPLETED) throw new OrderException(ErrorCode.BAD_REQUEST, "이미 완료된 발주입니다.");
+
+        OrderState state = findWithKey(key);
         if (images != null) updateImage(detail, images);
         if (requestDto != null) detail.update(requestDto);
+        if (state != null) detail.updateState(state);
     }
 
     @Transactional
-    public void completeOrderDetail(Long orderId) {
+    public void completeOrderDetail(String token, Long orderId) {
+        // token 으로 role 이 직원인지 검증 로직 추가
         OrderDetail detail = detailRepository.findById(orderId)
                 .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist."));
 
@@ -205,8 +214,19 @@ public class OrderService {
     }
 
     @Transactional
-    public void removeOrder(Long orderId) {
-        orderRepository.deleteById(orderId);
+    public void removeOrder(String token, Long orderId) {
+        String role = jwtProvider.parseClaims(token).get("role").toString();
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist"));
+        if(role == ADMIN.toString()) {
+            orderRepository.delete(order);
+            return;
+        }
+        User findUser = userRepository.findByEmail(jwtProvider.getUid(token));
+        if(order.getUser() != findUser) throw new OrderException(ErrorCode.BAD_REQUEST, "발주자만 취소 가능합니다");
+        if(detailRepository.findStateById(orderId) != START)
+            throw new OrderException(ErrorCode.BAD_REQUEST, "작업을 시작한 발주는 취소할 수 없습니다. 별도로 문의해주세요");
+        orderRepository.delete(order);
     }
 
     private OrderFile saveFile(Order order, String url) {

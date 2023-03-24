@@ -4,6 +4,8 @@ import com.server.dos.config.jwt.JwtProvider;
 import com.server.dos.dto.AdminSaveRequestDto;
 import com.server.dos.dto.TokenDto;
 import com.server.dos.entity.user.Admin;
+import com.server.dos.exception.custom.AdminException;
+import com.server.dos.exception.error.ErrorCode;
 import com.server.dos.repository.AdminRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,9 +27,9 @@ public class AdminService {
         boolean checkEmail = adminRepository.existsByAdminEmail(saveRequestDto.getAdminEmail());
 
         if(checkId){
-            throw new RuntimeException("이미 존재하는 아이디입니다.");
+            throw new AdminException(ErrorCode.INTERNAL_SERVER_ERROR,"이미 존재하는 아이디입니다.");
         }else if(checkEmail){
-            throw new RuntimeException("이미 존재하는 이메일입니다.");
+            throw new AdminException(ErrorCode.INTERNAL_SERVER_ERROR,"이미 존재하는 이메일입니다.");
         }
         adminRepository.save(saveRequestDto.toEntity());
 
@@ -39,9 +41,9 @@ public class AdminService {
         Admin entity = adminRepository.findByAdminId(requestDto.getAdminId());
 
         if(entity == null){
-            throw new RuntimeException("해당 아이디가 존재하지 않습니다.");
+            throw new AdminException(ErrorCode.INTERNAL_SERVER_ERROR,"해당 아이디가 존재하지 않습니다.");
         }else if(!passwordEncoder.matches(requestDto.getAdminPw(),entity.getAdminPw())){
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+            throw new AdminException(ErrorCode.INTERNAL_SERVER_ERROR,"비밀번호가 일치하지 않습니다.");
         }
 
         return jwtProvider.generateToken(entity.getAdminEmail(), "ADMIN");

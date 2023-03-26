@@ -2,10 +2,15 @@ package com.server.dos.controller;
 
 import com.server.dos.config.jwt.JwtProvider;
 import com.server.dos.dto.TokenDto;
+import com.server.dos.dto.UserDto;
 import com.server.dos.exception.custom.TokenException;
 import com.server.dos.exception.error.ErrorCode;
+import com.server.dos.service.TokenForTest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 public class TokenController {
 
     private final JwtProvider jwtProvider;
+    private final TokenForTest tokenForTest;
 
     @GetMapping("/token/expired")
     public String auth(){
@@ -46,5 +52,11 @@ public class TokenController {
         }
 
         throw new TokenException(ErrorCode.UNAUTHORIZED,"토큰 재발급에 실패하였습니다.");
+    }
+
+    @PostMapping("/token/dummy")
+    public ResponseEntity<TokenDto> getUserTokenForTest(@RequestBody UserDto userDto) {
+        TokenDto tokenDto = tokenForTest.addDummyUser(userDto);
+        return ResponseEntity.ok(tokenDto);
     }
 }

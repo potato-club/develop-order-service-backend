@@ -55,11 +55,6 @@ public class OrderDetail extends BaseTimeEntity {
         if(state == COMPLETED) this.completedDate = LocalDateTime.now();
     }
 
-    public void complete() {
-        this.state = COMPLETED;
-        this.completedDate = LocalDateTime.now();
-    }
-
     public void setRating(double rating) {
         this.rating = rating;
     }

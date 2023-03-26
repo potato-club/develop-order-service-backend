@@ -80,25 +80,18 @@ public class OrderController {
         return ResponseEntity.ok(res);
     }
 
-    // 발주 상태 변경을 디테일 수정에 포함시키기 -> 발주 완료 처리 API 삭제
     @Operation(summary = "발주 디테일 수정")
     @PutMapping("/detail/{orderId}")
     public ResponseEntity<String> updateOrderDetail(@RequestHeader(value = "Authorization") String token,
                                                     @PathVariable(name = "orderId") Long orderId,
-                                                    @RequestParam(required = false, value = "state") int key,
-                                                    @RequestPart(value = "images", required = false) List<MultipartFile> images,
-                                                    @RequestPart(value = "orderDetail", required = false) OrderDetailRequestDto requestDto) {
+                                                    @RequestParam(required = false, value = "state",
+                                                            defaultValue = "0") int key,
+                                                    @RequestPart(value = "images",
+                                                            required = false) List<MultipartFile> images,
+                                                    @RequestPart(value = "orderDetail",
+                                                            required = false) OrderDetailRequestDto requestDto) {
         orderService.updateOrderDetail(token, orderId, key, images, requestDto);
         return ResponseEntity.ok("업데이트 완료");
-    }
-
-    // 헤더 토큰 받아서 직원 검증처리 로직 추가하기
-    @Operation(summary = "발주 완료 처리")
-    @PutMapping("/detail/{orderId}/complete")
-    public ResponseEntity<String> completeOrderDetail(@RequestHeader(value = "Authorization") String token,
-                                                      @PathVariable(name = "orderId") Long orderId) {
-        orderService.completeOrderDetail(token, orderId);
-        return ResponseEntity.ok("완료 처리되었습니다.");
     }
 
     @Operation(summary = "완료된 발주 별점 추가")

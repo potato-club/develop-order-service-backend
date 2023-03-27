@@ -27,7 +27,7 @@ public class JwtAuthFilter extends GenericFilter {  // 토큰 인증 처리
             Authentication authentication = jwtProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
-        log.info("들어오지 못함");
+
         chain.doFilter(request,response);
     }
 

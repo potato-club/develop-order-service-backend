@@ -3,13 +3,19 @@ package com.server.dos.Enum;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Arrays;
+
 import static com.server.dos.Enum.OrderType.*;
 
 @Getter
 @RequiredArgsConstructor
 public enum OrderState {
-    START("작업 시작", WORKING), DESIGN("디자인 회의", WORKING), PUBLISH("퍼블리싱", WORKING),
-    IMPLEMENT("기능 구현", WORKING), FINAL("최종 수정", WORKING), COMPLETED("완료", COMPLETE);
-    private final String detail;
+    START(1, WORKING), DESIGN(2, WORKING), PUBLISH(3, WORKING),
+    IMPLEMENT(4, WORKING), FINAL(5, WORKING), COMPLETED(6, COMPLETE);
+    private final int key;
     private final OrderType type;
+
+    public static OrderState findWithKey(int key) {
+        return Arrays.stream(values()).filter(state -> state.key == key).findAny().orElse(null);
+    }
 }

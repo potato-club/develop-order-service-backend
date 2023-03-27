@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.server.dos.Enum.OrderState.*;
+
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -48,9 +50,9 @@ public class OrderDetail extends BaseTimeEntity {
         this.likes = likes;
     }
 
-    public void complete() {
-        this.state = OrderState.COMPLETED;
-        this.completedDate = LocalDateTime.now();
+    public void updateState(OrderState state) {
+        this.state = state;
+        if(state == COMPLETED) this.completedDate = LocalDateTime.now();
     }
 
     public void setRating(double rating) {

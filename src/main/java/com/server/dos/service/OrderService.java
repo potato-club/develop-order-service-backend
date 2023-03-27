@@ -1,10 +1,13 @@
 package com.server.dos.service;
 
+import com.server.dos.Enum.OrderState;
 import com.server.dos.config.jwt.JwtProvider;
 import com.server.dos.dto.*;
 import com.server.dos.entity.*;
 import com.server.dos.entity.user.User;
+import com.server.dos.exception.custom.AdminException;
 import com.server.dos.exception.custom.OrderException;
+import com.server.dos.exception.custom.UserException;
 import com.server.dos.exception.error.ErrorCode;
 import com.server.dos.mapper.ImageMapper;
 import com.server.dos.repository.*;
@@ -21,6 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.server.dos.Enum.OrderState.*;
+import static com.server.dos.entity.user.Role.*;
 import static com.server.dos.mapper.OrderMapper.INSTANCE;
 
 @RequiredArgsConstructor
@@ -84,7 +88,6 @@ public class OrderService {
         return detailDtoPaging;
     }
 
-    // 메인 페이지 OrderList 정보 가져오기 (완료된 발주 중 좋아요 높은 순 5개)
     @Transactional
     public List<OrderMainDto> getMainOrders() {
         List<OrderDetail> details = detailRepository.findTop5ByOrderByLikesDesc();
@@ -94,11 +97,12 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    // OrderDetail 좋아요 추가
     @Transactional
     public String orderLike(String token, Long orderId) {
+        if(checkAdmin(token)) throw new AdminException(ErrorCode.BAD_REQUEST, "관리자는 추천할 수 없습니다.");
         OrderDetail detail = detailRepository.findCompleteById(orderId);
         User user = userRepository.findByEmail(jwtProvider.getUid(token));
+        if(user == null) throw new UserException(ErrorCode.BAD_REQUEST, "존재하지 않는 유저입니다.");
         if(detail == null) throw new OrderException(ErrorCode.BAD_REQUEST, "존재하지 않는 완료된 발주입니다");
         if(user.getId() == detail.getUserId()) throw new OrderException(ErrorCode.BAD_REQUEST,
                 "본인의 발주는 추천할 수 없습니다.");
@@ -160,20 +164,18 @@ public class OrderService {
     }
 
     @Transactional
-    public void updateOrderDetail(Long orderId, List<MultipartFile> images, OrderDetailRequestDto requestDto) {
+    public void updateOrderDetail(String token, Long orderId, int key,
+                                  List<MultipartFile> images, OrderDetailRequestDto requestDto) {
+        if(!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 수정 불가능합니다.");
+
         OrderDetail detail = detailRepository.findById(orderId)
                 .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist."));
         if(detail.getState() == COMPLETED) throw new OrderException(ErrorCode.BAD_REQUEST, "이미 완료된 발주입니다.");
+
+        OrderState state = findWithKey(key);
         if (images != null) updateImage(detail, images);
         if (requestDto != null) detail.update(requestDto);
-    }
-
-    @Transactional
-    public void completeOrderDetail(Long orderId) {
-        OrderDetail detail = detailRepository.findById(orderId)
-                .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist."));
-
-        detail.complete();
+        if (state != null) detail.updateState(state);
     }
 
     @Transactional
@@ -205,8 +207,27 @@ public class OrderService {
     }
 
     @Transactional
-    public void removeOrder(Long orderId) {
-        orderRepository.deleteById(orderId);
+    public void removeOrder(String token, Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist"));
+        if(checkAdmin(token)) {
+            orderRepository.delete(order);
+            return;
+        }
+        User findUser = userRepository.findByEmail(jwtProvider.getUid(token));
+        if(order.getUser() != findUser) throw new OrderException(ErrorCode.BAD_REQUEST, "발주자만 취소 가능합니다");
+        if(detailRepository.findStateById(orderId) != START)
+            throw new OrderException(ErrorCode.BAD_REQUEST, "작업을 시작한 발주는 취소할 수 없습니다. 별도로 문의해주세요");
+        orderRepository.delete(order);
+    }
+
+    @Transactional
+    public Boolean checkSiteNameDuplicate(String siteName) {
+        Order order = orderRepository.findBySiteName(siteName);
+        if(order == null) {
+            return false;
+        }
+        return true;
     }
 
     private OrderFile saveFile(Order order, String url) {
@@ -227,11 +248,8 @@ public class OrderService {
         return imageRepository.save(orderImage);
     }
 
-    public Boolean checkSiteNameDuplicate(String siteName) {
-        Order order = orderRepository.findBySiteName(siteName);
-        if(order == null) {
-            return false;
-        }
-        return true;
+    private boolean checkAdmin(String token) {
+        String role = jwtProvider.parseClaims(token).get("role").toString();
+        return role.equals(ADMIN.toString());
     }
 }

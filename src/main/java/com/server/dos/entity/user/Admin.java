@@ -1,5 +1,6 @@
 package com.server.dos.entity.user;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Entity
 public class Admin {
@@ -23,28 +25,15 @@ public class Admin {
 
     @Column(nullable = false)
     private String adminName;
-
-    @Column(nullable = false,unique = true)
-    private String adminEmail;
-
-    @Column(nullable = false)
-    private String adminTech;
-
-    @Column(nullable = false)
-    private String adminPhone;
-
     @Column
     @Enumerated(EnumType.STRING)
     private Role role;
 
     @Builder
-    public Admin(String adminId,String adminPw,String adminName,String adminEmail,String adminTech,String adminPhone,Role role){
+    public Admin(String adminId,String adminPw,String adminName,Role role){
         this.adminId = adminId;
         this.adminPw = adminPw;
         this.adminName = adminName;
-        this.adminEmail = adminEmail;
-        this.adminTech = adminTech;
-        this.adminPhone = adminPhone;
         this.role = role;
     }
 

@@ -1,28 +1,29 @@
 package com.server.dos.dto;
 
-import com.server.dos.entity.user.Admin;
-import com.server.dos.entity.user.Role;
+import com.server.dos.entity.AdminInfo;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 public class AdminResponseDto {
 
-//    private String adminId;
-    private String adminName;
-    private String adminEmail;
-    private String adminPhone;
-    private String adminTech;
+    private String name;
+    private String email;
+    private String tech;
+    private String phone;
+    private String title;
+    private String color;
 
-    private Role role;
-
-    public AdminResponseDto(Admin entity){
-//        this.adminId = entity.getAdminId();
-        this.adminName = entity.getAdminName();
-        this.adminEmail = entity.getAdminEmail();
-        this.adminPhone = entity.getAdminPhone();
-        this.adminTech = entity.getAdminTech();
-        this.role = entity.getRole();
+    public AdminResponseDto(AdminInfo entity){
+        this.name = entity.getName();
+        this.email = entity.getEmail();
+        this.tech = entity.getTech();
+        this.phone = entity.getPhone();
+        this.title = entity.getTitle();
+        this.color = entity.getColor();
     }
+
 }

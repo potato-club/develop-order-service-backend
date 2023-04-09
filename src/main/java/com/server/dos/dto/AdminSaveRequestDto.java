@@ -17,22 +17,13 @@ public class AdminSaveRequestDto {
 
     private String adminName;
 
-    private String adminEmail;
-
-    private String adminTech;
-
-    private String adminPhone;
-
     private Role role;
 
     @Builder
-    public AdminSaveRequestDto(String adminId,String adminPw,String adminName,String adminEmail,String adminTech,String adminPhone,Role role){
+    public AdminSaveRequestDto(String adminId,String adminPw,String adminName,Role role){
         this.adminId = adminId;
         this.adminPw = adminPw;
         this.adminName = adminName;
-        this.adminEmail = adminEmail;
-        this.adminTech = adminTech;
-        this.adminPhone = adminPhone;
         this.role = role;
     }
     public Admin toEntity(){
@@ -40,9 +31,6 @@ public class AdminSaveRequestDto {
                 .adminId(adminId)
                 .adminPw(new BCryptPasswordEncoder().encode(adminPw))
                 .adminName(adminName)
-                .adminEmail(adminEmail)
-                .adminTech(adminTech)
-                .adminPhone(adminPhone)
                 .role(Role.ADMIN)
                 .build();
     }

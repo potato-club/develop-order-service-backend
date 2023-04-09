@@ -17,6 +17,7 @@ public class OrderLike {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_detail_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private OrderDetail orderDetail;
 
     @ManyToOne(fetch = FetchType.LAZY)

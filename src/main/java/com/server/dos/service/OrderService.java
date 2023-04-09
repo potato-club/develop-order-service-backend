@@ -69,10 +69,7 @@ public class OrderService {
         } else {
             detailPaging = detailRepository.findWorkingDetails(pageRequest);
         }
-        Page<OrderDetailListDto> detailDtoPaging = detailPaging.map(INSTANCE::toDetailListDto)
-                .map(dto -> addThumbnail(dto));
-
-        return detailDtoPaging;
+        return detailPaging.map(INSTANCE::toDetailListDto).map(this::addThumbnail);
     }
 
     @Transactional

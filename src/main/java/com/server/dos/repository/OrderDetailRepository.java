@@ -23,7 +23,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
     Page<OrderDetail> findCompletedDetails(Pageable pageable);
 
     @Query(value = "select d from OrderDetail d where not d.state=com.server.dos.Enum.OrderState.COMPLETED",
-    countQuery = "select d from OrderDetail d where not d.state=com.server.dos.Enum.OrderState.COMPLETED")
+    countQuery = "select count(d) from OrderDetail d where not d.state=com.server.dos.Enum.OrderState.COMPLETED")
     Page<OrderDetail> findWorkingDetails(Pageable pageable);
 
     @Query("select d.state from OrderDetail d where d.id=:id")

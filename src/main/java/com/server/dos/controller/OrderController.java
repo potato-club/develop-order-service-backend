@@ -84,13 +84,11 @@ public class OrderController {
     @PutMapping("/detail/{orderId}")
     public ResponseEntity<String> updateOrderDetail(@RequestHeader(value = "Authorization") String token,
                                                     @PathVariable(name = "orderId") Long orderId,
-                                                    @RequestParam(required = false, value = "state",
-                                                            defaultValue = "0") int key,
                                                     @RequestPart(value = "images",
                                                             required = false) List<MultipartFile> images,
                                                     @RequestPart(value = "orderDetail",
                                                             required = false) OrderDetailRequestDto requestDto) {
-        orderService.updateOrderDetail(token, orderId, key, images, requestDto);
+        orderService.updateOrderDetail(token, orderId, images, requestDto);
         return ResponseEntity.ok("업데이트 완료");
     }
 

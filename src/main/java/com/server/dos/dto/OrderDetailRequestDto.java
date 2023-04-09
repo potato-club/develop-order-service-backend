@@ -7,5 +7,5 @@ public class OrderDetailRequestDto {
     private Boolean database;
     private Boolean login;
     private Integer page;
-    private Integer stateKey;
+    private Integer stateKey = 0;
 }

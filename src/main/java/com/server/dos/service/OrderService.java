@@ -161,7 +161,7 @@ public class OrderService {
     }
 
     @Transactional
-    public void updateOrderDetail(String token, Long orderId, int key,
+    public void updateOrderDetail(String token, Long orderId,
                                   List<MultipartFile> images, OrderDetailRequestDto requestDto) {
         if(!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 수정 불가능합니다.");
 
@@ -169,10 +169,10 @@ public class OrderService {
                 .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist."));
         if(detail.getState() == COMPLETED) throw new OrderException(ErrorCode.BAD_REQUEST, "이미 완료된 발주입니다.");
 
-        OrderState state = findWithKey(key);
+        OrderState state = findWithKey(requestDto.getStateKey());
         if (images != null) updateImage(detail, images);
-        if (requestDto != null) detail.update(requestDto);
         if (state != null) detail.updateState(state);
+        detail.update(requestDto);
     }
 
     @Transactional

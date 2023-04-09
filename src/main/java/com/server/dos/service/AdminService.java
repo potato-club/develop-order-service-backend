@@ -58,11 +58,18 @@ public class AdminService {
 
     // 직원 정보 조회
     @Transactional(readOnly = true)
-    public List<AdminResponseDto> getAdminInfo(){
+    public List<AdminListResponseDto> getAdminInfo(){
         List<AdminInfo> allAdmin = adminInfoRepository.findAll();
         return allAdmin.stream()
-                .map(INSTANCE::toResponse)
+                .map(INSTANCE::toInfoResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public AdminScheduleDto getAdminSchedule(String adminName){
+        AdminInfo adminInfo = adminInfoRepository.findByName(adminName);
+        if(adminInfo == null){throw new IllegalArgumentException("해당 관리자가 존재하지 않습니다.");}
+        return INSTANCE.toScheduleResponse(adminInfo);
     }
 
     // 직원 정보 저장

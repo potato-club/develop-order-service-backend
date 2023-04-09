@@ -5,6 +5,7 @@ import com.server.dos.service.AdminService;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @Api(tags = "관리자 API")
 @RequiredArgsConstructor
 @RequestMapping("/admin")
+@Slf4j
 @RestController
 public class AdminController {
 
@@ -57,15 +59,17 @@ public class AdminController {
     // === 미완성 ====
     @Operation(summary = "직원 정보 반환")
     @GetMapping("/info")
-    public ResponseEntity<List<AdminResponseDto>> getAdminInfo(){
-        List<AdminResponseDto> adminInfo = adminService.getAdminInfo();
+    public ResponseEntity<List<AdminListResponseDto>> getAdminInfo(){
+        List<AdminListResponseDto> adminInfo = adminService.getAdminInfo();
         return ResponseEntity.ok(adminInfo);
     }
 
     // === 미완성 ====
     @Operation(summary = "직원 스케줄 반환")
     @GetMapping("/{adminName}/schedule")
-    public ResponseEntity getAdminSchedule(@PathVariable("adminName")String adminName){
-        return ResponseEntity.ok("완료");
+    public ResponseEntity<AdminScheduleDto> getAdminSchedule(@PathVariable("adminName")String adminName){
+        log.info("PathVariable을 통한 관리자이름: " + adminName);
+        AdminScheduleDto adminSchedule = adminService.getAdminSchedule(adminName);
+        return ResponseEntity.ok(adminSchedule);
     }
 }

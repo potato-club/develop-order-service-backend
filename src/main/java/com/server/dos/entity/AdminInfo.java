@@ -7,13 +7,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Builder
 @Entity
-public class AdminInfo {
+public class AdminInfo extends BaseTimeEntity{
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,6 +32,12 @@ public class AdminInfo {
     private String phone;
 
     @Column(nullable = false)
+    private LocalDateTime start;
+
+    @Column(nullable = false)
+    private LocalDateTime end;
+
+    @Column(nullable = false)
     private String title;
 
     @Column(nullable = false)
@@ -42,6 +49,8 @@ public class AdminInfo {
         this.email = updateDto.getEmail();
         this.tech = updateDto.getTech();
         this.phone = updateDto.getPhone();
+        this.start = updateDto.getStart();
+        this.end = updateDto.getEnd();
         this.title = updateDto.getTitle();
         this.color = updateDto.getColor();
     }

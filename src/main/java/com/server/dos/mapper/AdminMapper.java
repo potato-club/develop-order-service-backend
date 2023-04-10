@@ -19,6 +19,8 @@ public interface AdminMapper {
     AdminListResponseDto toInfoResponse(AdminInfo adminInfo);
 
     @Mapping(source = "adminInfo.name",target = "name")
+    @Mapping(source = "adminInfo.start",target = "start")
+    @Mapping(source = "adminInfo.end",target = "end")
     @Mapping(source = "adminInfo.title",target = "title")
     @Mapping(source = "adminInfo.color",target = "color")
     AdminScheduleDto toScheduleResponse(AdminInfo adminInfo);

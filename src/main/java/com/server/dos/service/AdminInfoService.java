@@ -5,6 +5,8 @@ import com.server.dos.dto.AdminInfoRequestDto;
 import com.server.dos.dto.AdminInfoUpdateDto;
 import com.server.dos.dto.AdminListResponseDto;
 import com.server.dos.entity.AdminInfo;
+import com.server.dos.exception.custom.AdminException;
+import com.server.dos.exception.error.ErrorCode;
 import com.server.dos.repository.AdminInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,7 +30,7 @@ public class AdminInfoService {
     public void saveInfo(String token,AdminInfoRequestDto infoRequestDto){
         boolean check = checkRole(token);
         if (!check){
-            throw new IllegalArgumentException("관리자가 아니면 삭제가 불가능합니다.");
+            throw new AdminException(ErrorCode.FORBIDDEN,"관리자가 아니면 삭제가 불가능합니다.");
         }
         adminInfoRepository.save(infoRequestDto.toEntity());
     }
@@ -47,9 +49,10 @@ public class AdminInfoService {
     public void updateInfo(String token,Long adminId, AdminInfoUpdateDto updateDto){
         boolean check = checkRole(token);
         if (!check){
-            throw new IllegalArgumentException("관리자가 아니면 수정이 불가능합니다.");
+            throw new AdminException(ErrorCode.FORBIDDEN,"관리자가 아니면 수정이 불가능합니다.");
         }
-        AdminInfo info = adminInfoRepository.findById(adminId).orElseThrow(()->new IllegalArgumentException("존재하지 않은 직원입니다."));
+        AdminInfo info = adminInfoRepository.findById(adminId)
+                .orElseThrow(()->new AdminException(ErrorCode.BAD_REQUEST,"존재하지 않은 직원입니다."));
         info.update(updateDto);
     }
 
@@ -58,9 +61,10 @@ public class AdminInfoService {
     public void deleteInfo(String token,Long id){
         boolean check = checkRole(token);
         if (!check){
-            throw new IllegalArgumentException("관리자가 아니면 삭제가 불가능합니다.");
+            throw new AdminException(ErrorCode.FORBIDDEN,"관리자가 아니면 삭제가 불가능합니다.");
         }
-        AdminInfo info = adminInfoRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지 않은 직원입니다."));
+        AdminInfo info = adminInfoRepository.findById(id)
+                .orElseThrow(()->new AdminException(ErrorCode.BAD_REQUEST,"존재하지 않은 직원입니다."));
         adminInfoRepository.delete(info);
     }
 

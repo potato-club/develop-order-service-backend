@@ -49,7 +49,7 @@ public class UserController {
             return ResponseEntity.ok(adminDto);
         }
         User user = userRepository.findByEmail(jwtProvider.getUid(token));
-        UserDto userDto = UserDto.builder().email(user.getEmail()).name(user.getName()).picture(user.getPicture()).build();
+        UserDto userDto = new UserDto(user);
         return ResponseEntity.ok(userDto);
     }
 }

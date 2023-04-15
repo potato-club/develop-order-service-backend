@@ -5,7 +5,6 @@ import com.server.dos.dto.*;
 import com.server.dos.entity.user.Admin;
 import com.server.dos.exception.custom.AdminException;
 import com.server.dos.exception.error.ErrorCode;
-import com.server.dos.repository.AdminInfoRepository;
 import com.server.dos.repository.AdminRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,18 +20,17 @@ public class AdminService {
 
     private final AdminRepository adminRepository;
     private final JwtProvider jwtProvider;
-    private final AdminInfoRepository adminInfoRepository;
     BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Transactional
     public String joinAdmin(AdminSaveRequestDto saveRequestDto){
         boolean checkId = adminRepository.existsByAdminId(saveRequestDto.getAdminId());
-//        boolean checkEmail = adminRepository.existsByAdminEmail(saveRequestDto.getAdminEmail());
+        boolean checkEmail = adminRepository.existsByAdminEmail(saveRequestDto.getAdminEmail());
 
-        if(checkId){
-            throw new AdminException(ErrorCode.INTERNAL_SERVER_ERROR,"이미 존재하는 아이디입니다.");}
-//        }else if(checkEmail){
-//            throw new AdminException(ErrorCode.INTERNAL_SERVER_ERROR,"이미 존재하는 이메일입니다.");
-//        }
+        if(checkId) {
+            throw new AdminException(ErrorCode.BAD_REQUEST, "이미 존재하는 아이디입니다.");
+        } else if(checkEmail){
+            throw new AdminException(ErrorCode.BAD_REQUEST,"이미 존재하는 이메일입니다.");
+        }
         adminRepository.save(saveRequestDto.toEntity());
 
         return "관리자 회원가입 완료";
@@ -43,12 +41,12 @@ public class AdminService {
         Admin entity = adminRepository.findByAdminId(adminLoginDto.getAdminId());
 
         if(entity == null){
-            throw new AdminException(ErrorCode.INTERNAL_SERVER_ERROR,"해당 아이디가 존재하지 않습니다.");
+            throw new AdminException(ErrorCode.BAD_REQUEST,"해당 아이디가 존재하지 않습니다.");
         }else if(!passwordEncoder.matches(adminLoginDto.getAdminPw(),entity.getAdminPw())){
-            throw new AdminException(ErrorCode.INTERNAL_SERVER_ERROR,"비밀번호가 일치하지 않습니다.");
+            throw new AdminException(ErrorCode.BAD_REQUEST,"비밀번호가 일치하지 않습니다.");
         }
 
-        return jwtProvider.generateToken(entity.getAdminId(), "ADMIN");
+        return jwtProvider.generateToken(entity.getAdminId(), entity.getRole().toString());
     }
 
 }

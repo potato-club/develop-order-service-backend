@@ -35,22 +35,26 @@ public class AdminController {
 
     @Operation(summary = "직원 정보 등록")
     @PostMapping("/info/register")
-    public ResponseEntity<String> createAdminInfo(@RequestBody AdminInfoRequestDto infoRequestDto){
-        adminInfoService.saveInfo(infoRequestDto);
+    public ResponseEntity<String> createAdminInfo(@RequestHeader("Authorization")String token,
+                                                  @RequestBody AdminInfoRequestDto infoRequestDto){
+        adminInfoService.saveInfo(token,infoRequestDto);
         return ResponseEntity.ok("직원정보 등록완료");
     }
 
     @Operation(summary = "직원 정보 수정")
     @PutMapping("/info/{adminId}/update")
-    public ResponseEntity<String> updateAdminInfo(@PathVariable("adminId")Long adminId, @RequestBody AdminInfoUpdateDto updateDto){
-        adminInfoService.updateInfo(adminId,updateDto);
+    public ResponseEntity<String> updateAdminInfo(@RequestHeader("Authorization")String token,
+                                                  @PathVariable("adminId")Long adminId,
+                                                  @RequestBody AdminInfoUpdateDto updateDto){
+        adminInfoService.updateInfo(token,adminId,updateDto);
         return ResponseEntity.ok("직원정보 수정완료");
     }
 
     @Operation(summary = "직원 정보 삭제")
     @DeleteMapping("/info/{adminId}/delete")
-    public ResponseEntity<String> deleteAdminInfo(@PathVariable("adminId")Long adminId){
-        adminInfoService.deleteInfo(adminId);
+    public ResponseEntity<String> deleteAdminInfo(@RequestHeader("Authorization")String token,
+                                                  @PathVariable("adminId")Long adminId){
+        adminInfoService.deleteInfo(token,adminId);
         return ResponseEntity.ok("직원정보 삭제완료");
     }
 
@@ -59,12 +63,5 @@ public class AdminController {
     public ResponseEntity<?> getAdminInfo(){
         List<AdminListResponseDto> adminInfoList = adminInfoService.getAdminInfo();
         return ResponseEntity.ok(adminInfoList);
-    }
-
-    @Operation(summary = "직원 스케줄 조회")
-    @GetMapping("/{adminName}/schedule")
-    public ResponseEntity<?> getAdminSchedule(@PathVariable("adminName")String adminName){
-        AdminScheduleDto adminSchedule = adminInfoService.getAdminSchedule(adminName);
-        return ResponseEntity.ok(adminSchedule);
     }
 }

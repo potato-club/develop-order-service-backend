@@ -8,6 +8,7 @@ import com.server.dos.exception.error.ErrorCode;
 import com.server.dos.repository.AdminRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ public class AdminService {
 
     private final AdminRepository adminRepository;
     private final JwtProvider jwtProvider;
+    private final RedisTemplate<String,Object> redisTemplate;
     BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Transactional
     public String joinAdmin(AdminSaveRequestDto saveRequestDto){
@@ -46,7 +48,10 @@ public class AdminService {
             throw new AdminException(ErrorCode.BAD_REQUEST,"비밀번호가 일치하지 않습니다.");
         }
 
-        return jwtProvider.generateToken(entity.getAdminId(), entity.getRole().toString());
+        TokenDto tokenDto = jwtProvider.generateToken(entity.getAdminId(), entity.getRole().toString());
+        redisTemplate.opsForValue().set("Admin-RefreshToken",tokenDto.getRefreshToken());
+
+        return tokenDto;
     }
 
 }

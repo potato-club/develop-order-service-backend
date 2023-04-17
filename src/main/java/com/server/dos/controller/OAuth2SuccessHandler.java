@@ -7,6 +7,7 @@ import com.server.dos.dto.UserDto;
 import com.server.dos.mapper.UserOauthMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -24,6 +25,7 @@ import java.io.IOException;
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final UserOauthMapper userRequestMapper;
     private final JwtProvider jwtProvider;
+    private final RedisTemplate<String,Object> redisTemplate;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
@@ -40,6 +42,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         TokenDto token = jwtProvider.generateToken(userDto.getEmail(),"USER");
 //        jwtProvider.sendAccessAndRefreshToken(response,token.getAccessToken(),token.getRefreshToken());
+
+        redisTemplate.opsForValue().set("User-RefreshToken",token.getRefreshToken());
+
 
         tagUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/login/")
                 .queryParam("accesstoken",token.getAccessToken())

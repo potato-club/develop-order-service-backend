@@ -37,20 +37,13 @@ public class TokenController {
 
         if (token != null && jwtProvider.verifyToken(token)) {
             String email = jwtProvider.getUid(token);
-            TokenDto newToken = jwtProvider.generateToken(email, "USER");
+            String role = jwtProvider.parseClaims(token).get("role").toString();
+            TokenDto newToken = jwtProvider.generateToken(email, role);
 
             response.addHeader("Auth", newToken.getAccessToken());
             response.addHeader("Refresh", newToken.getRefreshToken());
             response.setContentType("application/json;charset=UTF-8");
 
-
-//            String tagUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/login/")
-//                    .queryParam("accesstoken",newToken.getAccessToken())
-//                    .queryParam("refresh",newToken.getRefreshToken())
-//                    .build().toUriString();
-//
-//
-//            getRedirectStrategy().sendRedirect(request,response,tagUrl);
             return "NEW TOKEN";
         }
 

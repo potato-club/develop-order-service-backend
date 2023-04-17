@@ -1,9 +1,12 @@
 package com.server.dos.config.jwt;
 
 import com.server.dos.dto.TokenDto;
+import com.server.dos.exception.custom.TokenException;
+import com.server.dos.exception.error.ErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -76,9 +79,18 @@ public class JwtProvider {  // 토큰 인증 및 검증
             return claims.getBody()
                     .getExpiration()
                     .after(new Date());
-        }catch (Exception e) {
-            return false;
+        }catch (ExpiredJwtException e){
+            throw new TokenException(ErrorCode.UNAUTHORIZED,"토큰 기한이 만료되었습니다.");
+        }catch (UnsupportedJwtException e){
+            throw new TokenException(ErrorCode.UNAUTHORIZED,"예상하는 형식과 일치하지 않는 특정 형식이나 구성의 토큰입니다.");
+        }catch (SignatureException e){
+            throw new TokenException(ErrorCode.UNAUTHORIZED,"사용자 인증을 실패하였습니다..");
+        }catch (MalformedJwtException e){
+            throw new TokenException(ErrorCode.UNAUTHORIZED,"올바른 JWT 구성이 아닙니다.");
+        }catch (Exception e){
+            throw new TokenException(ErrorCode.UNAUTHORIZED,e.getMessage());
         }
+
     }
 
     // JWT 토큰을 복호화하여 토큰에 들어있는 정보를 꺼내는 메소드

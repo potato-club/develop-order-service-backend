@@ -42,9 +42,10 @@ public class OrderService {
     private final JwtProvider jwtProvider;
 
     @Transactional
-    public List<OrderResponseDto> getAllOrder() {
-        List<Order> all = orderRepository.findAll();
-        return all.stream().map(INSTANCE::toResponse).collect(Collectors.toList());
+    public Page<OrderResponseDto> getAllOrder(int page) {
+        PageRequest request = PageRequest.of(page - 1, 100, Sort.by(Sort.Direction.DESC, "id"));
+        Page<Order> all = orderRepository.findAll(request);
+        return all.map(INSTANCE::toResponse);
     }
 
     @Transactional

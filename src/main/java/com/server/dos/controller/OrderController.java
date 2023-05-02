@@ -22,8 +22,9 @@ public class OrderController {
 
     @Operation(summary = "모든 발주 리스트 반환")
     @GetMapping("")
-    public ResponseEntity<List<OrderResponseDto>> getAllOrder() {
-        List<OrderResponseDto> allOrder = orderService.getAllOrder();
+    public ResponseEntity<Page<OrderResponseDto>> getAllOrder(
+            @RequestParam(required = false, defaultValue = "1", value = "page") int page) {
+        Page<OrderResponseDto> allOrder = orderService.getAllOrder(page);
         return ResponseEntity.ok(allOrder);
     }
 

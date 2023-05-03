@@ -29,7 +29,7 @@ public class OrderController {
         return ResponseEntity.ok(allOrder);
     }
 
-    @Operation(summary = "모든 발주 리스트 반환")
+    @Operation(summary = "단일 발주 정보 반환")
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponseDto> getOrder(
             @RequestHeader(value = "Authorization") String token,

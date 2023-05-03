@@ -44,7 +44,7 @@ public class OrderService {
     @Transactional
     public Page<OrderListResponseDto> getAllOrder(String token, int page) {
         if(!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 조회 불가능합니다.");
-        PageRequest request = PageRequest.of(page - 1, 100, Sort.by(Sort.Direction.DESC, "id"));
+        PageRequest request = PageRequest.of(page - 1, 10, Sort.by(Sort.Direction.DESC, "id"));
         Page<Order> all = orderRepository.findAll(request);
         return all.map(INSTANCE::toListResponse);
     }

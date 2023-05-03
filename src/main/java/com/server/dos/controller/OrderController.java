@@ -22,10 +22,20 @@ public class OrderController {
 
     @Operation(summary = "모든 발주 리스트 반환")
     @GetMapping("")
-    public ResponseEntity<Page<OrderResponseDto>> getAllOrder(
+    public ResponseEntity<Page<OrderListResponseDto>> getAllOrder(
+            @RequestHeader(value = "Authorization") String token,
             @RequestParam(required = false, defaultValue = "1", value = "page") int page) {
-        Page<OrderResponseDto> allOrder = orderService.getAllOrder(page);
+        Page<OrderListResponseDto> allOrder = orderService.getAllOrder(token, page);
         return ResponseEntity.ok(allOrder);
+    }
+
+    @Operation(summary = "모든 발주 리스트 반환")
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderResponseDto> getOrder(
+            @RequestHeader(value = "Authorization") String token,
+            @PathVariable(name = "orderId") Long orderId) {
+        OrderResponseDto orderDto = orderService.getOrder(token, orderId);
+        return ResponseEntity.ok(orderDto);
     }
 
     @Operation(summary = "메인 페이지 발주 리스트 반환")

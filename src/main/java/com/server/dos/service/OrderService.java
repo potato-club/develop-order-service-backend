@@ -42,10 +42,19 @@ public class OrderService {
     private final JwtProvider jwtProvider;
 
     @Transactional
-    public Page<OrderResponseDto> getAllOrder(int page) {
+    public Page<OrderListResponseDto> getAllOrder(String token, int page) {
+        if(!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 조회 불가능합니다.");
         PageRequest request = PageRequest.of(page - 1, 100, Sort.by(Sort.Direction.DESC, "id"));
         Page<Order> all = orderRepository.findAll(request);
-        return all.map(INSTANCE::toResponse);
+        return all.map(INSTANCE::toListResponse);
+    }
+
+    @Transactional
+    public OrderResponseDto getOrder(String token, Long orderId) {
+        if(!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 조회 불가능합니다.");
+        Order order = orderRepository.findById(orderId).orElseThrow();
+        OrderResponseDto dto = INSTANCE.toResponse(order);
+        return dto;
     }
 
     @Transactional

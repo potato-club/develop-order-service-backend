@@ -55,7 +55,7 @@ public class Orders extends BaseTimeEntity{
     private Boolean login;
 
     @Column
-    private Boolean database;
+    private Boolean needDatabase;
 
     @OneToMany(mappedBy = "orders", orphanRemoval = true)
     private List<OrderFile> orderFiles = new ArrayList<>();
@@ -71,7 +71,7 @@ public class Orders extends BaseTimeEntity{
     private String etc;
 
     public void update(OrderDetailRequestDto requestDto) {
-        if(requestDto.getDatabase() != null) this.database = requestDto.getDatabase();
+        if(requestDto.getDatabase() != null) this.needDatabase = requestDto.getDatabase();
         if(requestDto.getLogin() != null) this.login = requestDto.getLogin();
         if(requestDto.getPage() != null) this.page = requestDto.getPage();
     }

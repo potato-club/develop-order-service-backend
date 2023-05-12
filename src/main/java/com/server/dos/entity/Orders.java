@@ -43,10 +43,10 @@ public class Orders extends BaseTimeEntity{
 
     @Column
     @ElementCollection(fetch = FetchType.LAZY)
-    private List<String> mainColor;
+    private List<String> mainColor = new ArrayList<>();
 
     @ElementCollection(fetch = FetchType.LAZY)
-    private List<String> subColor;
+    private List<String> subColor = new ArrayList<>();
 
     @Column
     private Integer page;

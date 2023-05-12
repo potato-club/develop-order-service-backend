@@ -49,7 +49,7 @@ public class OrderRequestDto {
                 .owner(owner)
                 .mainColor(mainColor)
                 .subColor(subColor)
-                .database(database)
+                .needDatabase(database)
                 .login(login)
                 .meeting(parseDate(meeting))
                 .page(page)

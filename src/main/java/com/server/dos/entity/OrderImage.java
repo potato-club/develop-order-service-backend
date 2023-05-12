@@ -23,7 +23,7 @@ public class OrderImage {
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_detail_id")
+    @JoinColumn(name = "orders_detail_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private OrderDetail orderDetail;
 

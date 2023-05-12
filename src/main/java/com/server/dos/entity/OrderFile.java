@@ -12,6 +12,7 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @Getter
+@Table(name = "orders_files")
 public class OrderFile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

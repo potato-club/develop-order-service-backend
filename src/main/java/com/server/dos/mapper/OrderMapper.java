@@ -1,9 +1,6 @@
 package com.server.dos.mapper;
 
-import com.server.dos.dto.OrderDetailDto;
-import com.server.dos.dto.OrderDetailListDto;
-import com.server.dos.dto.OrderMeetingDto;
-import com.server.dos.dto.OrderResponseDto;
+import com.server.dos.dto.*;
 import com.server.dos.entity.Order;
 import com.server.dos.entity.OrderDetail;
 import org.mapstruct.Mapper;
@@ -14,7 +11,14 @@ import org.mapstruct.factory.Mappers;
 public interface OrderMapper {
     OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
+    @Mapping(source = "client.clientName", target = "name")
+    @Mapping(source = "client.clientEmail", target = "email")
+    @Mapping(source = "client.hotLine", target = "hotLine")
+    @Mapping(source = "client.subLine", target = "subLine")
     OrderResponseDto toResponse(Order order);
+
+    @Mapping(source = "client.clientName", target = "clientName")
+    OrderListResponseDto toListResponse(Order order);
 
     @Mapping(source = "client.clientName", target = "name")
     OrderMeetingDto toMeeting(Order order);

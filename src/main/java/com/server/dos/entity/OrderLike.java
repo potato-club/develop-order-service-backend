@@ -11,12 +11,13 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @Getter
+@Table(name = "orders_likes")
 public class OrderLike {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_detail_id", nullable = false)
+    @JoinColumn(name = "orders_detail_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private OrderDetail orderDetail;
 

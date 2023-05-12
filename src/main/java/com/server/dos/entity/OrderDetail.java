@@ -35,6 +35,7 @@ public class OrderDetail extends BaseTimeEntity {
     private Double rating;
     private LocalDateTime completedDate;
     private int likes;
+    private Long userId;
 
     @OneToOne
     @JoinColumn(name = "orders_id")

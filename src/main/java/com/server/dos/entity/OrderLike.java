@@ -17,12 +17,12 @@ public class OrderLike {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "orders_detail_id", nullable = false)
+    @JoinColumn(name = "orders_details_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private OrderDetail orderDetail;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "users_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 

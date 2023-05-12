@@ -26,7 +26,7 @@ public interface OrderMapper {
     @Mapping(source = "orders.siteName", target = "siteName")
     @Mapping(source = "orders.purpose", target = "purpose")
     @Mapping(source = "orders.createdDate", target = "createdDate")
-    @Mapping(source = "orders.database", target = "database")
+    @Mapping(source = "orders.needDatabase", target = "database")
     @Mapping(source = "orders.login", target = "login")
     @Mapping(source = "orders.page", target = "page")
     OrderDetailDto toDetailDto(OrderDetail detail);

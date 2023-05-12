@@ -1,6 +1,5 @@
 package com.server.dos.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,12 +26,12 @@ public class OrderFile {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "orders_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Order order;
+    private Orders orders;
 
     @Builder
-    public OrderFile(String fileName, String s3Url, Order order) {
+    public OrderFile(String fileName, String s3Url, Orders orders) {
         this.fileName = fileName;
         this.s3Url = s3Url;
-        this.order = order;
+        this.orders = orders;
     }
 }

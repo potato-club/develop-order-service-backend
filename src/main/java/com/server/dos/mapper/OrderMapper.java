@@ -1,7 +1,7 @@
 package com.server.dos.mapper;
 
 import com.server.dos.dto.*;
-import com.server.dos.entity.Order;
+import com.server.dos.entity.Orders;
 import com.server.dos.entity.OrderDetail;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -15,24 +15,24 @@ public interface OrderMapper {
     @Mapping(source = "client.clientEmail", target = "email")
     @Mapping(source = "client.hotLine", target = "hotLine")
     @Mapping(source = "client.subLine", target = "subLine")
-    OrderResponseDto toResponse(Order order);
+    OrderResponseDto toResponse(Orders orders);
 
     @Mapping(source = "client.clientName", target = "clientName")
-    OrderListResponseDto toListResponse(Order order);
+    OrderListResponseDto toListResponse(Orders orders);
 
     @Mapping(source = "client.clientName", target = "name")
-    OrderMeetingDto toMeeting(Order order);
+    OrderMeetingDto toMeeting(Orders orders);
 
-    @Mapping(source = "order.siteName", target = "siteName")
-    @Mapping(source = "order.purpose", target = "purpose")
-    @Mapping(source = "order.createdDate", target = "createdDate")
-    @Mapping(source = "order.database", target = "database")
-    @Mapping(source = "order.login", target = "login")
-    @Mapping(source = "order.page", target = "page")
+    @Mapping(source = "orders.siteName", target = "siteName")
+    @Mapping(source = "orders.purpose", target = "purpose")
+    @Mapping(source = "orders.createdDate", target = "createdDate")
+    @Mapping(source = "orders.database", target = "database")
+    @Mapping(source = "orders.login", target = "login")
+    @Mapping(source = "orders.page", target = "page")
     OrderDetailDto toDetailDto(OrderDetail detail);
 
-    @Mapping(source = "order.siteName", target = "siteName")
-    @Mapping(source = "order.purpose", target = "purpose")
-    @Mapping(source = "order.createdDate", target = "createdDate")
+    @Mapping(source = "orders.siteName", target = "siteName")
+    @Mapping(source = "orders.purpose", target = "purpose")
+    @Mapping(source = "orders.createdDate", target = "createdDate")
     OrderDetailListDto toDetailListDto(OrderDetail detail);
 }

@@ -1,7 +1,7 @@
 package com.server.dos.dto;
 
 import com.server.dos.entity.Client;
-import com.server.dos.entity.Order;
+import com.server.dos.entity.Orders;
 import com.server.dos.Enum.SiteOwner;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -41,8 +41,8 @@ public class OrderRequestDto {
     @ApiModelProperty(value = "기타 추가 사항", example = "대충 만들면 돈 안줄겁니다 호호")
     private String etc;
 
-    public Order toEntity() {
-        return Order.builder()
+    public Orders toEntity() {
+        return Orders.builder()
                 .client(new Client(name, email, hotLine, subLine))
                 .siteName(siteName)
                 .purpose(purpose)

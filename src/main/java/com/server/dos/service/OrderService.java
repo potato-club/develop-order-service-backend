@@ -45,21 +45,21 @@ public class OrderService {
     public Page<OrderListResponseDto> getAllOrder(String token, int page) {
         if(!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 조회 불가능합니다.");
         PageRequest request = PageRequest.of(page - 1, 10, Sort.by(Sort.Direction.DESC, "id"));
-        Page<Order> all = orderRepository.findAll(request);
+        Page<Orders> all = orderRepository.findAll(request);
         return all.map(INSTANCE::toListResponse);
     }
 
     @Transactional
     public OrderResponseDto getOrder(String token, Long orderId) {
         if(!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 조회 불가능합니다.");
-        Order order = orderRepository.findById(orderId).orElseThrow();
-        OrderResponseDto dto = INSTANCE.toResponse(order);
+        Orders orders = orderRepository.findById(orderId).orElseThrow();
+        OrderResponseDto dto = INSTANCE.toResponse(orders);
         return dto;
     }
 
     @Transactional
     public List<MeetingDateDto> getAllOrderMeeting() {
-        List<Order> all = orderRepository.findAll();
+        List<Orders> all = orderRepository.findAll();
         return all.stream().map(INSTANCE::toMeeting).map(MeetingDateDto::new).collect(Collectors.toList());
     }
 
@@ -140,14 +140,14 @@ public class OrderService {
 
     @Transactional
     public void createOrder(String token, List<MultipartFile> files, OrderRequestDto orderDto) {
-        Order order;
+        Orders orders;
         if(orderRepository.findBySiteName(orderDto.getSiteName()) != null) {
             throw new OrderException(ErrorCode.CONFLICT, "이미 존재하는 sitename 입니다");
         }
         try {
-            Order o = orderDto.toEntity();
+            Orders o = orderDto.toEntity();
             o.setUser(userRepository.findByEmail(jwtProvider.getUid(token)));
-            order = orderRepository.save(o);
+            orders = orderRepository.save(o);
         } catch (DataIntegrityViolationException ex) {
             throw new OrderException(ErrorCode.CONFLICT, "Meeting 시간 중복입니다.");
         }
@@ -155,16 +155,16 @@ public class OrderService {
         if(files != null) {
             files.stream()
                     .map(uploadService::upload)
-                    .map(url -> saveFile(order, url))
+                    .map(url -> saveFile(orders, url))
                     .collect(Collectors.toList());
         }
 
         OrderDetail detail = OrderDetail.builder()
-                .id(order.getId())
+                .id(orders.getId())
                 .state(START)
-                .order(order)
+                .orders(orders)
                 .likes(0)
-                .userId(order.getUser().getId())
+                .userId(orders.getUser().getId())
                 .build();
 
         detailRepository.save(detail);
@@ -215,33 +215,33 @@ public class OrderService {
 
     @Transactional
     public void removeOrder(String token, Long orderId) {
-        Order order = orderRepository.findById(orderId)
+        Orders orders = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist"));
         if(checkAdmin(token)) {
-            orderRepository.delete(order);
+            orderRepository.delete(orders);
             return;
         }
         User findUser = userRepository.findByEmail(jwtProvider.getUid(token));
-        if(order.getUser() != findUser) throw new OrderException(ErrorCode.BAD_REQUEST, "발주자만 취소 가능합니다");
+        if(orders.getUser() != findUser) throw new OrderException(ErrorCode.BAD_REQUEST, "발주자만 취소 가능합니다");
         if(detailRepository.findStateById(orderId) != START)
             throw new OrderException(ErrorCode.BAD_REQUEST, "작업을 시작한 발주는 취소할 수 없습니다. 별도로 문의해주세요");
-        orderRepository.delete(order);
+        orderRepository.delete(orders);
     }
 
     @Transactional
     public Boolean checkSiteNameDuplicate(String siteName) {
-        Order order = orderRepository.findBySiteName(siteName);
-        if(order == null) {
+        Orders orders = orderRepository.findBySiteName(siteName);
+        if(orders == null) {
             return false;
         }
         return true;
     }
 
-    private OrderFile saveFile(Order order, String url) {
+    private OrderFile saveFile(Orders orders, String url) {
         OrderFile orderFile = OrderFile.builder()
                 .s3Url(url)
                 .fileName(StringUtils.getFilename(url))
-                .order(order)
+                .orders(orders)
                 .build();
         return fileRepository.save(orderFile);
     }

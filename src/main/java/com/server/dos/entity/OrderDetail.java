@@ -40,10 +40,10 @@ public class OrderDetail extends BaseTimeEntity {
     @OneToOne
     @JoinColumn(name = "orders_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Order order;
+    private Orders orders;
 
     public void update(OrderDetailRequestDto requestDto) {
-        this.order.update(requestDto);
+        this.orders.update(requestDto);
     }
 
     public void setLikes(int likes) {

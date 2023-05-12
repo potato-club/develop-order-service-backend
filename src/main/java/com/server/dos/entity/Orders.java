@@ -22,7 +22,7 @@ import static javax.persistence.GenerationType.*;
 @Builder
 @Getter
 @Table(name = "orders")
-public class Order extends BaseTimeEntity{
+public class Orders extends BaseTimeEntity{
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
@@ -57,7 +57,7 @@ public class Order extends BaseTimeEntity{
     @Column
     private Boolean database;
 
-    @OneToMany(mappedBy = "order", orphanRemoval = true)
+    @OneToMany(mappedBy = "orders", orphanRemoval = true)
     private List<OrderFile> orderFiles = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

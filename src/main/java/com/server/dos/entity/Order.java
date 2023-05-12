@@ -61,7 +61,7 @@ public class Order extends BaseTimeEntity{
     private List<OrderFile> orderFiles = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "users_id")
     private User user;
 
     @Column(nullable = false, unique = true)

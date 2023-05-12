@@ -21,7 +21,7 @@ import static com.server.dos.Enum.OrderState.*;
 @AllArgsConstructor
 @Builder
 @Getter
-@Table(name = "orders_detail")
+@Table(name = "orders_details")
 public class OrderDetail extends BaseTimeEntity {
     @Id
     private Long id;

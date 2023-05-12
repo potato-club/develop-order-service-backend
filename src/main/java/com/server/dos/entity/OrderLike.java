@@ -11,6 +11,7 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @Getter
+@Table(name = "orders_likes")
 public class OrderLike {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

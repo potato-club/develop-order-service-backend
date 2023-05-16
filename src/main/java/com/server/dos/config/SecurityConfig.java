@@ -41,10 +41,10 @@ public class SecurityConfig {
                 .antMatchers("/admin/signup","/admin/login").permitAll()
                 .anyRequest().authenticated()   // 나머지 URL들은 모두 인증된 사용자(로그인한 사용자)에게만 허용
                 .and()
-                .logout().logoutSuccessUrl("/")
+                .logout().logoutSuccessUrl("/").permitAll()
                 .and()
-                .oauth2Login().loginPage("/")
-                .defaultSuccessUrl("/")        // oauth2 인증 성공 시 이동되는 url
+                .oauth2Login().loginPage("/").permitAll()
+//                .defaultSuccessUrl("/")        // oauth2 인증 성공 시 이동되는 url
                 .successHandler(oAuth2SuccessHandler)     // 인증 프로세스에 따라 사용자 정의 로직 실행
                 .userInfoEndpoint()        //OAuth 2 로그인 성공 이후 사용자 정보를 가져올 때의 설정등을 담당
                 .userService(customOAuth2UserService);  // 로그인이 성공하면 해당 유저의 정보를 갖고 customOAuth2UserService에서 후처리를 함

@@ -154,7 +154,7 @@ public class OrderService {
 
         if(files != null) {
             files.stream()
-                    .map(uploadService::upload)
+                    .map(f -> uploadService.upload(f, "references"))
                     .map(url -> saveFile(orders, url))
                     .collect(Collectors.toList());
         }
@@ -208,7 +208,7 @@ public class OrderService {
         }
 
         images.stream()
-                .map(uploadService::upload)
+                .map(i -> uploadService.upload(i, "images"))
                 .map(url -> saveImage(detail, url))
                 .collect(Collectors.toList());
     }

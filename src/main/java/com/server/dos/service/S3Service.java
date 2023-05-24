@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.UUID;
 
 @Transactional
 @Service
@@ -28,38 +29,41 @@ public class S3Service {
     @Value("${s3.bucket}")
     private String bucket;
 
-    @Transactional
-    public String upload(MultipartFile multipartFile) {
+    public String upload(MultipartFile multipartFile, String dir) {
         if(multipartFile.isEmpty()) {
             throw new IllegalArgumentException("File is Empty");
         }
         String fileName = multipartFile.getOriginalFilename();
         long size = multipartFile.getSize();
 
+        String uuid = UUID.randomUUID().toString();
+        String fileNameWithUUID = uuid + fileName;
+        String filePath = dir + "/" + fileNameWithUUID;
+
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentType(multipartFile.getContentType());
         objectMetadata.setContentLength(size);
 
         try {
-            amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, multipartFile.getInputStream(), objectMetadata)
+            amazonS3Client.putObject(new PutObjectRequest(bucket, filePath, multipartFile.getInputStream(), objectMetadata)
                     .withCannedAcl(CannedAccessControlList.PublicRead));
         } catch (IOException e) {
             throw new RuntimeException("File Stream Error");
         }
 
-        return amazonS3Client.getUrl(bucket, fileName).toString();
+        return amazonS3Client.getUrl(bucket, filePath).toString();
     }
 
-    @Transactional
-    public ResponseEntity<byte[]> download(String fileName) throws IOException {
-        S3Object s3Object = amazonS3Client.getObject(new GetObjectRequest(bucket, fileName));
+    public ResponseEntity<byte[]> download(String filePath) throws IOException {
+        S3Object s3Object = amazonS3Client.getObject(new GetObjectRequest(bucket, filePath));
         S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
         byte[] bytes = IOUtils.toByteArray(objectInputStream);
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(contentType(fileName));
+        httpHeaders.setContentType(contentType(filePath));
         httpHeaders.setContentLength(bytes.length);
 
+        String fileName = getFileNameFromPath(filePath);
         String name = URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20");
         httpHeaders.setContentDispositionFormData("attachment", name);
 
@@ -81,12 +85,19 @@ public class S3Service {
         }
     }
 
-    @Transactional
-    public void delete(String fileName) {
+    public void delete(String filePath) {
         try {
-            amazonS3Client.deleteObject(new DeleteObjectRequest(bucket, fileName));
+            amazonS3Client.deleteObject(new DeleteObjectRequest(bucket, filePath));
         } catch (AmazonServiceException e) {
             throw new RuntimeException("delete failed");
         }
+    }
+
+    private String getFileNameFromPath(String filePath) {
+        int lastIndex = filePath.lastIndexOf('/');
+        if (lastIndex != -1 && lastIndex < filePath.length() - 1) {
+            return filePath.substring(lastIndex + 1);
+        }
+        return filePath;
     }
 }

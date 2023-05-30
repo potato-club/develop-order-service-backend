@@ -20,12 +20,6 @@ public class AdminController {
     private final AdminService adminService;
     private final AdminInfoService adminInfoService;
 
-    @Operation(summary = "직원 회원가입")
-    @PostMapping("/signup")
-    public ResponseEntity<String> adminSignup(@RequestBody AdminSaveRequestDto saveRequestDto){
-        return ResponseEntity.ok(adminService.joinAdmin(saveRequestDto));
-    }
-
     @Operation(summary = "직원 로그인")
     @PostMapping("/login")
     public ResponseEntity<TokenDto> adminLogin(@RequestBody AdminLoginDto adminLoginDto){

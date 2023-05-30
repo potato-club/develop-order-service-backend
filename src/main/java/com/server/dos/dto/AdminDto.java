@@ -14,8 +14,6 @@ public class AdminDto {
     private Role role;
 
     public AdminDto(Admin admin) {
-        this.name = admin.getAdminName();
-        this.email = admin.getAdminEmail();
         this.picture = "";
         this.role = Role.ADMIN;
     }

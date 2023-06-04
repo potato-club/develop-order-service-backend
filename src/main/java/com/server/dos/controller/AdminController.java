@@ -1,7 +1,6 @@
 package com.server.dos.controller;
 
 import com.server.dos.dto.*;
-import com.server.dos.service.AdminInfoService;
 import com.server.dos.service.AdminService;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,7 +17,6 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
-    private final AdminInfoService adminInfoService;
 
     @Operation(summary = "직원 로그인")
     @PostMapping("/login")
@@ -31,31 +29,63 @@ public class AdminController {
     @PostMapping("/info/register")
     public ResponseEntity<String> createAdminInfo(@RequestHeader("Authorization")String token,
                                                   @RequestBody AdminInfoRequestDto infoRequestDto){
-        adminInfoService.saveInfo(token,infoRequestDto);
+        adminService.saveInfo(token,infoRequestDto);
         return ResponseEntity.ok("직원정보 등록완료");
     }
 
     @Operation(summary = "직원 정보 수정")
-    @PutMapping("/info/{adminId}/update")
+    @PutMapping("/info/update")
     public ResponseEntity<String> updateAdminInfo(@RequestHeader("Authorization")String token,
-                                                  @PathVariable("adminId")Long adminId,
-                                                  @RequestBody AdminInfoUpdateDto updateDto){
-        adminInfoService.updateInfo(token,adminId,updateDto);
+                                                  @RequestParam("AdminInfoId")Long adminId,
+                                                  @RequestBody AdminInfoRequestDto updateDto){
+        adminService.updateInfo(token,adminId,updateDto);
         return ResponseEntity.ok("직원정보 수정완료");
     }
 
     @Operation(summary = "직원 정보 삭제")
-    @DeleteMapping("/info/{adminId}/delete")
+    @DeleteMapping("/info/delete")
     public ResponseEntity<String> deleteAdminInfo(@RequestHeader("Authorization")String token,
-                                                  @PathVariable("adminId")Long adminId){
-        adminInfoService.deleteInfo(token,adminId);
+                                                  @RequestParam("AdminInfoId") Long adminId){
+        adminService.deleteInfo(token,adminId);
         return ResponseEntity.ok("직원정보 삭제완료");
     }
 
     @Operation(summary = "직원 정보 조회")
     @GetMapping("/info")
     public ResponseEntity<?> getAdminInfo(){
-        List<AdminListResponseDto> adminInfoList = adminInfoService.getAdminInfo();
+        List<AdminListResponseDto> adminInfoList = adminService.getAdminInfo();
         return ResponseEntity.ok(adminInfoList);
+    }
+
+    @Operation(summary = "직원 스케줄 저장")
+    @PostMapping("/schedule/register")
+    public ResponseEntity<String> createSchedule(@RequestHeader("Authorization")String token,
+                                                 @RequestBody AdminScheduleRequestDto requestDto){
+        adminService.createSchedule(token,requestDto);
+        return ResponseEntity.ok("직원 스케줄이 저장되었습니다.");
+    }
+
+    @Operation(summary = "직원 스케줄 수정")
+    @PutMapping("/schedule/{adminScheduleId}/update")
+    public ResponseEntity<String> updateSchedule(@RequestHeader("Authorization")String token,
+                               @PathVariable Long adminScheduleId,
+                               @RequestBody AdminScheduleRequestDto requestDto){
+        adminService.updateSchedule(token,adminScheduleId,requestDto);
+        return ResponseEntity.ok("직원 스케줄이 수정되었습니다");
+    }
+
+    @Operation(summary = "직원 스케줄 조회")
+    @GetMapping("/schedule")
+    public ResponseEntity<List<AdminScheduleResponseDto>> getSchedule(){
+        List<AdminScheduleResponseDto> schedule = adminService.getSchedule();
+        return ResponseEntity.ok(schedule);
+    }
+
+    @Operation(summary = "직원 스케줄 삭제")
+    @DeleteMapping("/schedule/delete")
+    public ResponseEntity<String> deleteSchedule(@RequestHeader("Authorization")String token,
+            @RequestParam("AdminScheduleId") Long AdminScheduleId){
+        adminService.deleteSchedule(token,AdminScheduleId);
+        return ResponseEntity.ok("직원 스케줄 삭제가 완료되었습니다.");
     }
 }

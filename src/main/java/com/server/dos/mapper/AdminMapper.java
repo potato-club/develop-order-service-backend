@@ -1,7 +1,9 @@
 package com.server.dos.mapper;
 
 import com.server.dos.dto.AdminListResponseDto;
+import com.server.dos.dto.AdminScheduleResponseDto;
 import com.server.dos.entity.AdminInfo;
+import com.server.dos.entity.AdminSchedule;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -15,10 +17,13 @@ public interface AdminMapper {
     @Mapping(source = "adminInfo.email",target = "email")
     @Mapping(source = "adminInfo.tech",target = "tech")
     @Mapping(source = "adminInfo.phone",target = "phone")
-    @Mapping(source = "adminInfo.start",target = "start")
-    @Mapping(source = "adminInfo.end",target = "end")
-    @Mapping(source = "adminInfo.title",target = "title")
-    @Mapping(source = "adminInfo.color",target = "color")
     AdminListResponseDto toInfoResponse(AdminInfo adminInfo);
+
+    @Mapping(source = "schedule.name",target = "name")
+    @Mapping(source = "schedule.start",target = "start")
+    @Mapping(source = "schedule.end",target = "end")
+    @Mapping(source = "schedule.title",target = "title")
+    @Mapping(source = "schedule.color",target = "color")
+    AdminScheduleResponseDto toScheResponse(AdminSchedule schedule);
 
 }

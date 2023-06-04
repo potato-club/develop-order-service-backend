@@ -44,7 +44,7 @@ public class UserController {
     public ResponseEntity<?> getUserInfo(@RequestHeader(value = "Authorization")String token){
         String role = jwtProvider.parseClaims(token).get("role").toString();
         if(role.equals(ADMIN.toString())) {
-            Admin admin = adminRepository.findByAdminId(jwtProvider.getUid(token));
+            Admin admin = adminRepository.findByAdminLoginId(jwtProvider.getUid(token));
             AdminDto adminDto = new AdminDto(admin);
             return ResponseEntity.ok(adminDto);
         }

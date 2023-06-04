@@ -1,19 +1,20 @@
 package com.server.dos.entity;
 
-import com.server.dos.dto.AdminInfoUpdateDto;
+import com.server.dos.dto.AdminInfoRequestDto;
+import com.server.dos.entity.user.Admin;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Builder
 @Entity
+@Table(name = "admin_info")
 public class AdminInfo extends BaseTimeEntity{
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,27 +32,16 @@ public class AdminInfo extends BaseTimeEntity{
     @Column(nullable = false)
     private String phone;
 
-    @Column(nullable = false)
-    private LocalDateTime start;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "admin_id")
+    private Admin admin;
 
-    @Column(nullable = false)
-    private LocalDateTime end;
-
-    @Column(nullable = false)
-    private String title;
-
-    @Column(nullable = false)
-    private String color;
 
     // 직원 정보 수정
-    public void update(AdminInfoUpdateDto updateDto){
+    public void update(AdminInfoRequestDto updateDto){
         this.name = updateDto.getName();
         this.email = updateDto.getEmail();
         this.tech = updateDto.getTech();
         this.phone = updateDto.getPhone();
-        this.start = updateDto.getStart();
-        this.end = updateDto.getEnd();
-        this.title = updateDto.getTitle();
-        this.color = updateDto.getColor();
     }
 }

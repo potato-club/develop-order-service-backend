@@ -43,7 +43,7 @@ public class OrderService {
 
     @Transactional
     public Page<OrderListResponseDto> getAllOrder(String token, int page) {
-        if(!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 조회 불가능합니다.");
+        if (!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 조회 불가능합니다.");
         PageRequest request = PageRequest.of(page - 1, 10, Sort.by(Sort.Direction.DESC, "id"));
         Page<Orders> all = orderRepository.findAll(request);
         return all.map(INSTANCE::toListResponse);
@@ -51,7 +51,7 @@ public class OrderService {
 
     @Transactional
     public OrderResponseDto getOrder(String token, Long orderId) {
-        if(!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 조회 불가능합니다.");
+        if (!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 조회 불가능합니다.");
         Orders orders = orderRepository.findById(orderId).orElseThrow();
         OrderResponseDto dto = INSTANCE.toResponse(orders);
         return dto;
@@ -66,19 +66,32 @@ public class OrderService {
     @Transactional
     public OrderDetailDto getOrderDetail(Long orderId) {
         OrderDetail detail = detailRepository.findById(orderId)
-                .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist."));
+                .orElseThrow(() -> new OrderException(ErrorCode.NOT_FOUND, "Order is not exist."));
+
         return INSTANCE.toDetailDto(detail);
     }
 
     @Transactional
-    public Page<OrderDetailListDto> getOrderDetailList(String state, int page) {
+    public Page<OrderDetailListDto> getOrderDetailList(String state, String sort, int page) {
         Page<OrderDetail> detailPaging;
-        PageRequest pageRequest = PageRequest.of(page - 1, 4, Sort.by(Sort.Direction.DESC, "id"));
-        if (state.equals("complete")) {
-            detailPaging = detailRepository.findCompletedDetails(pageRequest);
+        PageRequest pageRequest;
+
+        if(sort.equals("likes")) {
+            pageRequest = PageRequest.of(page - 1, 4, Sort.by(Sort.Direction.DESC, "likes")
+                    .and(Sort.by(Sort.Direction.DESC, "createdDate")));
+        } else if (sort.equals("rating") && state.equals("complete")) {
+            pageRequest = PageRequest.of(page - 1, 4, Sort.by(Sort.Direction.DESC, "rating")
+                    .and(Sort.by(Sort.Direction.DESC, "createdDate")));
         } else {
-            detailPaging = detailRepository.findWorkingDetails(pageRequest);
+            pageRequest = PageRequest.of(page - 1, 4, Sort.by(Sort.Direction.DESC, "createdDate"));
         }
+
+        if (state.equals("complete")) {
+            detailPaging = detailRepository.findCompletedDetails(pageRequest, COMPLETED);
+        } else {
+            detailPaging = detailRepository.findNotCompletedDetails(pageRequest, COMPLETED);
+        }
+
         return detailPaging.map(INSTANCE::toDetailListDto).map(this::addThumbnail);
     }
 
@@ -106,15 +119,15 @@ public class OrderService {
 
     @Transactional
     public String orderLike(String token, Long orderId) {
-        if(checkAdmin(token)) throw new AdminException(ErrorCode.BAD_REQUEST, "관리자는 추천할 수 없습니다.");
+        if (checkAdmin(token)) throw new AdminException(ErrorCode.BAD_REQUEST, "관리자는 추천할 수 없습니다.");
         OrderDetail detail = detailRepository.findCompleteById(orderId);
         User user = userRepository.findByEmail(jwtProvider.getUid(token));
-        if(user == null) throw new UserException(ErrorCode.BAD_REQUEST, "존재하지 않는 유저입니다.");
-        if(detail == null) throw new OrderException(ErrorCode.BAD_REQUEST, "존재하지 않는 완료된 발주입니다");
-        if(user.getId() == detail.getUserId()) throw new OrderException(ErrorCode.BAD_REQUEST,
+        if (user == null) throw new UserException(ErrorCode.BAD_REQUEST, "존재하지 않는 유저입니다.");
+        if (detail == null) throw new OrderException(ErrorCode.BAD_REQUEST, "존재하지 않는 완료된 발주입니다");
+        if (user.getId() == detail.getUserId()) throw new OrderException(ErrorCode.BAD_REQUEST,
                 "본인의 발주는 추천할 수 없습니다.");
         OrderLike like = likeRepository.findByOrderDetailAndUser(detail, user);
-        if(like == null) {
+        if (like == null) {
             detail.setLikes(detail.getLikes() + 1);
             OrderLike orderLike = new OrderLike(detail, user);
             likeRepository.save(orderLike);
@@ -141,7 +154,7 @@ public class OrderService {
     @Transactional
     public void createOrder(String token, List<MultipartFile> files, OrderRequestDto orderDto) {
         Orders orders;
-        if(orderRepository.findBySiteName(orderDto.getSiteName()) != null) {
+        if (orderRepository.findBySiteName(orderDto.getSiteName()) != null) {
             throw new OrderException(ErrorCode.CONFLICT, "이미 존재하는 sitename 입니다");
         }
         try {
@@ -152,7 +165,7 @@ public class OrderService {
             throw new OrderException(ErrorCode.CONFLICT, "Meeting 시간 중복입니다.");
         }
 
-        if(files != null) {
+        if (files != null) {
             files.stream()
                     .map(f -> uploadService.upload(f, "references"))
                     .map(url -> saveFile(orders, url))
@@ -173,11 +186,11 @@ public class OrderService {
     @Transactional
     public void updateOrderDetail(String token, Long orderId,
                                   List<MultipartFile> images, OrderDetailRequestDto requestDto) {
-        if(!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 수정 불가능합니다.");
+        if (!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 수정 불가능합니다.");
 
         OrderDetail detail = detailRepository.findById(orderId)
                 .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist."));
-        if(detail.getState() == COMPLETED) throw new OrderException(ErrorCode.BAD_REQUEST, "이미 완료된 발주입니다.");
+        if (detail.getState() == COMPLETED) throw new OrderException(ErrorCode.BAD_REQUEST, "이미 완료된 발주입니다.");
 
         OrderState state = findWithKey(requestDto.getStateKey());
         if (images != null) updateImage(detail, images);
@@ -191,10 +204,10 @@ public class OrderService {
         OrderDetail detail = detailRepository.findById(orderId)
                 .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist"));
 
-        if(detail.getState() != COMPLETED) throw new OrderException(ErrorCode.BAD_REQUEST, "완료된 발주가 아닙니다.");
-        if(detail.getUserId() != user.getId()) throw new OrderException(ErrorCode.BAD_REQUEST,
+        if (detail.getState() != COMPLETED) throw new OrderException(ErrorCode.BAD_REQUEST, "완료된 발주가 아닙니다.");
+        if (detail.getUserId() != user.getId()) throw new OrderException(ErrorCode.BAD_REQUEST,
                 "발주자만 별점 부여 가능합니다");
-        if(detail.getRating() != null) throw new OrderException(ErrorCode.BAD_REQUEST, "이미 별점이 부여되었습니다.");
+        if (detail.getRating() != null) throw new OrderException(ErrorCode.BAD_REQUEST, "이미 별점이 부여되었습니다.");
         detail.setRating(rating.getRating());
     }
 
@@ -217,13 +230,13 @@ public class OrderService {
     public void removeOrder(String token, Long orderId) {
         Orders orders = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist"));
-        if(checkAdmin(token)) {
+        if (checkAdmin(token)) {
             orderRepository.delete(orders);
             return;
         }
         User findUser = userRepository.findByEmail(jwtProvider.getUid(token));
-        if(orders.getUser() != findUser) throw new OrderException(ErrorCode.BAD_REQUEST, "발주자만 취소 가능합니다");
-        if(detailRepository.findStateById(orderId) != START)
+        if (orders.getUser() != findUser) throw new OrderException(ErrorCode.BAD_REQUEST, "발주자만 취소 가능합니다");
+        if (detailRepository.findStateById(orderId) != START)
             throw new OrderException(ErrorCode.BAD_REQUEST, "작업을 시작한 발주는 취소할 수 없습니다. 별도로 문의해주세요");
         orderRepository.delete(orders);
     }
@@ -231,7 +244,7 @@ public class OrderService {
     @Transactional
     public Boolean checkSiteNameDuplicate(String siteName) {
         Orders orders = orderRepository.findBySiteName(siteName);
-        if(orders == null) {
+        if (orders == null) {
             return false;
         }
         return true;

@@ -56,8 +56,9 @@ public class OrderController {
     @GetMapping("/detail")
     public ResponseEntity<Page<OrderDetailListDto>> getOrderDetailList(
             @RequestParam(required = false, defaultValue = "working", value = "state") String state,
+            @RequestParam(required = false, defaultValue = "latest", value = "sort") String sort,
             @RequestParam(required = false, defaultValue = "1", value = "page") int page) {
-        Page<OrderDetailListDto> orderDetailList = orderService.getOrderDetailList(state, page);
+        Page<OrderDetailListDto> orderDetailList = orderService.getOrderDetailList(state, sort, page);
         return ResponseEntity.ok(orderDetailList);
     }
 

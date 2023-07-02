@@ -18,13 +18,13 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
     OrderDetail findCompleteById(Long id);
 
     @Query(value = "select d from OrderDetail d " +
-            "where d.state=com.server.dos.Enum.OrderState.COMPLETED",
-    countQuery = "select count(d) from OrderDetail d where d.state=com.server.dos.Enum.OrderState.COMPLETED")
-    Page<OrderDetail> findCompletedDetails(Pageable pageable);
+            "where d.state = :state",
+    countQuery = "select count(d) from OrderDetail d where d.state = :state")
+    Page<OrderDetail> findCompletedDetails(Pageable pageable, OrderState state);
 
-    @Query(value = "select d from OrderDetail d where not d.state=com.server.dos.Enum.OrderState.COMPLETED",
-    countQuery = "select count(d) from OrderDetail d where not d.state=com.server.dos.Enum.OrderState.COMPLETED")
-    Page<OrderDetail> findWorkingDetails(Pageable pageable);
+    @Query(value = "select d from OrderDetail d where not d.state = :state",
+    countQuery = "select count(d) from OrderDetail d where not d.state = :state")
+    Page<OrderDetail> findNotCompletedDetails(Pageable pageable, OrderState state);
 
     @Query("select d.state from OrderDetail d where d.id=:id")
     OrderState findStateById(Long id);

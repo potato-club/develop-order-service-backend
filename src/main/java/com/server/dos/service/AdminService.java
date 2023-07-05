@@ -53,13 +53,13 @@ public class AdminService {
 
     // 직원 정보 등록
     @Transactional
-    public void saveInfo(String token,AdminInfoRequestDto infoRequestDto){
+    public Long saveInfo(String token,AdminInfoRequestDto infoRequestDto){
         boolean check = checkRole(token);
         if (!check){
             throw new AdminException(ErrorCode.FORBIDDEN,"관리자가 아니면 등록이 불가능합니다.");
         }
         Admin admin = adminRepository.findByAdminLoginId(jwtProvider.getUid(token));
-        adminInfoRepository.save(infoRequestDto.toEntity(admin));
+        return adminInfoRepository.save(infoRequestDto.toEntity(admin)).getId();
     }
 
     // 직원 정보 조회
@@ -97,13 +97,13 @@ public class AdminService {
 
     // 직원 스케줄 저장
     @Transactional
-    public void createSchedule(String token,AdminScheduleRequestDto requestDto){
+    public Long createSchedule(String token,AdminScheduleRequestDto requestDto){
         boolean check = checkRole(token);
         if (!check){
             throw new AdminException(ErrorCode.FORBIDDEN,"관리자가 아니면 삭제가 불가능합니다.");
         }
         Admin admin = adminRepository.findByAdminLoginId(jwtProvider.getUid(token));
-        adminScheduleRepository.save(requestDto.toEntity(admin));
+        return adminScheduleRepository.save(requestDto.toEntity(admin)).getId();
     }
 
     // 직원 스케줄 조회(전체 회원 조회가능)

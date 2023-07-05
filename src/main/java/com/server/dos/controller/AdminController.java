@@ -27,10 +27,10 @@ public class AdminController {
 
     @Operation(summary = "직원 정보 등록")
     @PostMapping("/info/register")
-    public ResponseEntity<String> createAdminInfo(@RequestHeader("Authorization")String token,
+    public ResponseEntity<Long> createAdminInfo(@RequestHeader("Authorization")String token,
                                                   @RequestBody AdminInfoRequestDto infoRequestDto){
-        adminService.saveInfo(token,infoRequestDto);
-        return ResponseEntity.ok("직원정보 등록완료");
+        ;
+        return ResponseEntity.ok(adminService.saveInfo(token,infoRequestDto));
     }
 
     @Operation(summary = "직원 정보 수정")
@@ -59,16 +59,16 @@ public class AdminController {
 
     @Operation(summary = "직원 스케줄 저장")
     @PostMapping("/schedule/register")
-    public ResponseEntity<String> createSchedule(@RequestHeader("Authorization")String token,
+    public ResponseEntity<Long> createSchedule(@RequestHeader("Authorization")String token,
                                                  @RequestBody AdminScheduleRequestDto requestDto){
-        adminService.createSchedule(token,requestDto);
-        return ResponseEntity.ok("직원 스케줄이 저장되었습니다.");
+        ;
+        return ResponseEntity.ok(adminService.createSchedule(token,requestDto));
     }
 
     @Operation(summary = "직원 스케줄 수정")
-    @PutMapping("/schedule/{adminScheduleId}/update")
+    @PutMapping("/schedule/update")
     public ResponseEntity<String> updateSchedule(@RequestHeader("Authorization")String token,
-                               @PathVariable Long adminScheduleId,
+                               @RequestParam("AdminScheduleId") Long adminScheduleId,
                                @RequestBody AdminScheduleRequestDto requestDto){
         adminService.updateSchedule(token,adminScheduleId,requestDto);
         return ResponseEntity.ok("직원 스케줄이 수정되었습니다");

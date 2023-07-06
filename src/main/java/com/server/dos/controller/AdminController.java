@@ -29,12 +29,11 @@ public class AdminController {
     @PostMapping("/info/register")
     public ResponseEntity<Long> createAdminInfo(@RequestHeader("Authorization")String token,
                                                   @RequestBody AdminInfoRequestDto infoRequestDto){
-        ;
         return ResponseEntity.ok(adminService.saveInfo(token,infoRequestDto));
     }
 
     @Operation(summary = "직원 정보 수정")
-    @PutMapping("/info/update")
+    @PutMapping("/info")
     public ResponseEntity<String> updateAdminInfo(@RequestHeader("Authorization")String token,
                                                   @RequestParam("AdminInfoId")Long adminId,
                                                   @RequestBody AdminInfoRequestDto updateDto){
@@ -43,7 +42,7 @@ public class AdminController {
     }
 
     @Operation(summary = "직원 정보 삭제")
-    @DeleteMapping("/info/delete")
+    @DeleteMapping("/info")
     public ResponseEntity<String> deleteAdminInfo(@RequestHeader("Authorization")String token,
                                                   @RequestParam("AdminInfoId") Long adminId){
         adminService.deleteInfo(token,adminId);
@@ -61,12 +60,11 @@ public class AdminController {
     @PostMapping("/schedule/register")
     public ResponseEntity<Long> createSchedule(@RequestHeader("Authorization")String token,
                                                  @RequestBody AdminScheduleRequestDto requestDto){
-        ;
         return ResponseEntity.ok(adminService.createSchedule(token,requestDto));
     }
 
     @Operation(summary = "직원 스케줄 수정")
-    @PutMapping("/schedule/update")
+    @PutMapping("/schedule")
     public ResponseEntity<String> updateSchedule(@RequestHeader("Authorization")String token,
                                @RequestParam("AdminScheduleId") Long adminScheduleId,
                                @RequestBody AdminScheduleRequestDto requestDto){
@@ -82,7 +80,7 @@ public class AdminController {
     }
 
     @Operation(summary = "직원 스케줄 삭제")
-    @DeleteMapping("/schedule/delete")
+    @DeleteMapping("/schedule")
     public ResponseEntity<String> deleteSchedule(@RequestHeader("Authorization")String token,
             @RequestParam("AdminScheduleId") Long AdminScheduleId){
         adminService.deleteSchedule(token,AdminScheduleId);

@@ -8,6 +8,8 @@ import lombok.Data;
 @Data
 public class AdminListResponseDto {
 
+    @ApiModelProperty(value = "직원 등록번호(고유 id값)")
+    private Long id;
     @ApiModelProperty(value = "직원 이름", example = "박해연", required = true)
     private String name;
     @ApiModelProperty(value = "직원 이메일", example = "hi123@naver.com", required = true)

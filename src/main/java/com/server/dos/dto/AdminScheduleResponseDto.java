@@ -6,6 +6,8 @@ import lombok.Data;
 @Data
 public class AdminScheduleResponseDto {
 
+    @ApiModelProperty(value = "직원 등록번호(고유 id값)")
+    private Long id;
     @ApiModelProperty(value = "직원 이름",example = "haeyeon")
     private String name;
     @ApiModelProperty(value = "직원 스케줄 시작일", example = "2023-03-20T08:00", required = true)

@@ -37,4 +37,6 @@ public class OrderResponseDto {
     private LocalDateTime meeting;
     @ApiModelProperty(value = "기타 추가 사항", example = "대충 만들면 돈 안줄겁니다 호호")
     private String etc;
+    @ApiModelProperty(value = "참고 자료 리스트")
+    private List<FileDto> files;
 }

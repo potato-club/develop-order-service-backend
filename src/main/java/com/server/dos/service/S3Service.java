@@ -54,36 +54,36 @@ public class S3Service {
         return amazonS3Client.getUrl(bucket, filePath).toString();
     }
 
-    public ResponseEntity<byte[]> download(String filePath) throws IOException {
-        S3Object s3Object = amazonS3Client.getObject(new GetObjectRequest(bucket, filePath));
-        S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
-        byte[] bytes = IOUtils.toByteArray(objectInputStream);
-
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(contentType(filePath));
-        httpHeaders.setContentLength(bytes.length);
-
-        String fileName = getFileNameFromPath(filePath);
-        String name = URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20");
-        httpHeaders.setContentDispositionFormData("attachment", name);
-
-        return new ResponseEntity<>(bytes, httpHeaders, HttpStatus.OK);
-    }
-
-    private MediaType contentType(String key) {
-        String[] arr = key.split("\\.");
-        String type = arr[arr.length - 1];
-        switch (type) {
-            case "txt":
-                return MediaType.TEXT_PLAIN;
-            case "png":
-                return MediaType.IMAGE_PNG;
-            case "jpg":
-                return MediaType.IMAGE_JPEG;
-            default:
-                return MediaType.APPLICATION_OCTET_STREAM;
-        }
-    }
+//    public ResponseEntity<byte[]> download(String filePath) throws IOException {
+//        S3Object s3Object = amazonS3Client.getObject(new GetObjectRequest(bucket, filePath));
+//        S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
+//        byte[] bytes = IOUtils.toByteArray(objectInputStream);
+//
+//        HttpHeaders httpHeaders = new HttpHeaders();
+//        httpHeaders.setContentType(contentType(filePath));
+//        httpHeaders.setContentLength(bytes.length);
+//
+//        String fileName = getFileNameFromPath(filePath);
+//        String name = URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20");
+//        httpHeaders.setContentDispositionFormData("attachment", name);
+//
+//        return new ResponseEntity<>(bytes, httpHeaders, HttpStatus.OK);
+//    }
+//
+//    private MediaType contentType(String key) {
+//        String[] arr = key.split("\\.");
+//        String type = arr[arr.length - 1];
+//        switch (type) {
+//            case "txt":
+//                return MediaType.TEXT_PLAIN;
+//            case "png":
+//                return MediaType.IMAGE_PNG;
+//            case "jpg":
+//                return MediaType.IMAGE_JPEG;
+//            default:
+//                return MediaType.APPLICATION_OCTET_STREAM;
+//        }
+//    }
 
     public void delete(String filePath) {
         try {
@@ -93,11 +93,11 @@ public class S3Service {
         }
     }
 
-    private String getFileNameFromPath(String filePath) {
-        int lastIndex = filePath.lastIndexOf('/');
-        if (lastIndex != -1 && lastIndex < filePath.length() - 1) {
-            return filePath.substring(lastIndex + 1);
-        }
-        return filePath;
-    }
+//    private String getFileNameFromPath(String filePath) {
+//        int lastIndex = filePath.lastIndexOf('/');
+//        if (lastIndex != -1 && lastIndex < filePath.length() - 1) {
+//            return filePath.substring(lastIndex + 1);
+//        }
+//        return filePath;
+//    }
 }

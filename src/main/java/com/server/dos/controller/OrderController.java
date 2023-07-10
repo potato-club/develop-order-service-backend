@@ -20,16 +20,18 @@ import java.util.List;
 public class OrderController {
     private final OrderService orderService;
 
-    @Operation(summary = "모든 발주 리스트 반환")
+    // 검증 전 발주 리스트 반환 & 검증 후 완료되지 않은 발주 리스트 반환 => 유저가 작성한 내용만 보여줌 => 필터링만 추가하면 됨
+    @Operation(summary = "관리자 페이지 발주 리스트 반환")
     @GetMapping("")
     public ResponseEntity<Page<OrderListResponseDto>> getAllOrder(
             @RequestHeader(value = "Authorization") String token,
-            @RequestParam(required = false, defaultValue = "1", value = "page") int page) {
-        Page<OrderListResponseDto> allOrder = orderService.getAllOrder(token, page);
+            @RequestParam(required = false, defaultValue = "1", value = "page") int page,
+            @RequestParam(required = false, defaultValue = "true", value = "check") boolean check) {
+        Page<OrderListResponseDto> allOrder = orderService.getOrdersByState(token, page, check);
         return ResponseEntity.ok(allOrder);
     }
 
-    @Operation(summary = "단일 발주 정보 반환")
+    @Operation(summary = "관리자 페이지 단일 발주 정보 반환")
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponseDto> getOrder(
             @RequestHeader(value = "Authorization") String token,
@@ -90,6 +92,14 @@ public class OrderController {
                                                   @PathVariable(name = "orderId") Long orderId) {
         String res = orderService.orderLike(token, orderId);
         return ResponseEntity.ok(res);
+    }
+
+    @Operation(summary = "발주 신청 확인")
+    @PutMapping("/{orderId}/checked")
+    public ResponseEntity<String> checkOrder(@RequestHeader(value = "Authorization") String token,
+                                             @PathVariable(name = "orderId") Long orderId) {
+        orderService.checkOrder(token, orderId);
+        return ResponseEntity.ok("확인 완료");
     }
 
     @Operation(summary = "발주 디테일 수정")

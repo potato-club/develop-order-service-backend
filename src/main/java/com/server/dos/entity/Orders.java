@@ -57,6 +57,9 @@ public class Orders extends BaseTimeEntity{
     @Column
     private Boolean needDatabase;
 
+    @OneToOne(mappedBy = "orders", fetch = FetchType.LAZY)
+    private OrderDetail detail;
+
     @OneToMany(mappedBy = "orders", orphanRemoval = true)
     private List<OrderFile> orderFiles = new ArrayList<>();
 

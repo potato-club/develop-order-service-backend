@@ -10,7 +10,7 @@ import static com.server.dos.Enum.OrderType.*;
 @Getter
 @RequiredArgsConstructor
 public enum OrderState {
-    START(1, WORKING), DESIGN(2, WORKING), PUBLISH(3, WORKING),
+    CHECK(0, OrderType.READY), START(1, WORKING), DESIGN(2, WORKING), PUBLISH(3, WORKING),
     IMPLEMENT(4, WORKING), FINAL(5, WORKING), COMPLETED(6, COMPLETE);
     private final int key;
     private final OrderType type;

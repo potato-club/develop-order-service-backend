@@ -9,6 +9,7 @@ import com.server.dos.exception.custom.AdminException;
 import com.server.dos.exception.custom.OrderException;
 import com.server.dos.exception.custom.UserException;
 import com.server.dos.exception.error.ErrorCode;
+import com.server.dos.mapper.FileMapper;
 import com.server.dos.mapper.ImageMapper;
 import com.server.dos.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -42,10 +43,15 @@ public class OrderService {
     private final JwtProvider jwtProvider;
 
     @Transactional
-    public Page<OrderListResponseDto> getAllOrder(String token, int page) {
+    public Page<OrderListResponseDto> getOrdersByState(String token, int page, boolean checked) {
         if (!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 조회 불가능합니다.");
         PageRequest request = PageRequest.of(page - 1, 10, Sort.by(Sort.Direction.DESC, "id"));
-        Page<Orders> all = orderRepository.findAll(request);
+        Page<Orders> all;
+        if(!checked) {
+            all = orderRepository.findByOrderDetailState(request, CHECK);
+        } else {
+            all = orderRepository.findByOrderDetailWorking(request);
+        }
         return all.map(INSTANCE::toListResponse);
     }
 
@@ -54,6 +60,11 @@ public class OrderService {
         if (!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 조회 불가능합니다.");
         Orders orders = orderRepository.findById(orderId).orElseThrow();
         OrderResponseDto dto = INSTANCE.toResponse(orders);
+        List<OrderFile> files = fileRepository.findByOrders(orders);
+        if(!files.isEmpty()) {
+            List<FileDto> fileDtoList = files.stream().map(FileMapper.INSTANCE::toDto).collect(Collectors.toList());
+            dto.setFiles(fileDtoList);
+        }
         return dto;
     }
 
@@ -174,7 +185,7 @@ public class OrderService {
 
         OrderDetail detail = OrderDetail.builder()
                 .id(orders.getId())
-                .state(START)
+                .state(CHECK)
                 .orders(orders)
                 .likes(0)
                 .userId(orders.getUser().getId())
@@ -183,13 +194,21 @@ public class OrderService {
         detailRepository.save(detail);
     }
 
+    public void checkOrder(String token, Long orderId) {
+        if (!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 수정 불가능합니다.");
+
+        OrderDetail detail = detailRepository.findById(orderId)
+                .orElseThrow(() -> new OrderException(ErrorCode.NOT_FOUND, "Order is not exist."));
+        detail.updateState(START);
+    }
+
     @Transactional
     public void updateOrderDetail(String token, Long orderId,
                                   List<MultipartFile> images, OrderDetailRequestDto requestDto) {
         if (!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 수정 불가능합니다.");
 
         OrderDetail detail = detailRepository.findById(orderId)
-                .orElseThrow(() -> new OrderException(ErrorCode.BAD_REQUEST, "Order is not exist."));
+                .orElseThrow(() -> new OrderException(ErrorCode.NOT_FOUND, "Order is not exist."));
         if (detail.getState() == COMPLETED) throw new OrderException(ErrorCode.BAD_REQUEST, "이미 완료된 발주입니다.");
 
         OrderState state = findWithKey(requestDto.getStateKey());
@@ -236,7 +255,7 @@ public class OrderService {
         }
         User findUser = userRepository.findByEmail(jwtProvider.getUid(token));
         if (orders.getUser() != findUser) throw new OrderException(ErrorCode.BAD_REQUEST, "발주자만 취소 가능합니다");
-        if (detailRepository.findStateById(orderId) != START)
+        if (detailRepository.findStateById(orderId) != CHECK)
             throw new OrderException(ErrorCode.BAD_REQUEST, "작업을 시작한 발주는 취소할 수 없습니다. 별도로 문의해주세요");
         orderRepository.delete(orders);
     }

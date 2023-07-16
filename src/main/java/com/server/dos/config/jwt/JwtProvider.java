@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Component
 public class JwtProvider {  // 토큰 인증 및 검증
     private final Key key;
-    private final long accessExpire = 1000 * 60 * 30; // 30분
+    private final long accessExpire = 1000 * 60; // 30분
     private final long refreshExpire = 1000 * 60 * 60 * 24 * 14; // 2주
 
     public JwtProvider(@Value("${jwt.secret}") String secretKey){

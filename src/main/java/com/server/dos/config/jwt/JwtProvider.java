@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Component
 public class JwtProvider {  // 토큰 인증 및 검증
     private final Key key;
-    private final long accessExpire = 1000 * 60 * 30; // 30분
+    private final long accessExpire = 1000 * 60; // 30분
     private final long refreshExpire = 1000 * 60 * 60 * 24 * 14; // 2주
 
     public JwtProvider(@Value("${jwt.secret}") String secretKey){
@@ -48,7 +48,7 @@ public class JwtProvider {  // 토큰 인증 및 검증
                 .signWith(key)                 // header  "alg" : "HS256"
                 .compact();
 
-        String refreshToken = refreshToken(uid);
+        String refreshToken = refreshToken(uid,role);
 
         log.info("AccessToken : " + accessToken);
         log.info("RefreshToken : " + refreshToken);
@@ -60,10 +60,14 @@ public class JwtProvider {  // 토큰 인증 및 검증
     }
 
 
-    public String refreshToken(String uid){
+    public String refreshToken(String uid,String role){
+        Claims claims = Jwts.claims().setSubject(uid); // sub(subject) : 토큰제목
+        claims.put("role",role);
+
         Date now = new Date();
+
         return Jwts.builder()
-                .setSubject(uid)
+                .setClaims(claims)
                 .setExpiration(new Date(now.getTime() + refreshExpire))
                 .signWith(key)
                 .compact();

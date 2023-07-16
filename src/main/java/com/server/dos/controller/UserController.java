@@ -6,6 +6,8 @@ import com.server.dos.dto.OrderDetailListDto;
 import com.server.dos.dto.UserDto;
 import com.server.dos.entity.user.Admin;
 import com.server.dos.entity.user.User;
+import com.server.dos.exception.custom.UserException;
+import com.server.dos.exception.error.ErrorCode;
 import com.server.dos.repository.AdminRepository;
 import com.server.dos.repository.UserRepository;
 import com.server.dos.service.OrderService;
@@ -14,6 +16,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +32,8 @@ public class UserController {
     private final UserRepository userRepository;
     private final AdminRepository adminRepository;
     private final JwtProvider jwtProvider;
+
+    private final RedisTemplate<String,Object> redisTemplate;
 
     @Operation(summary = "유저의 발주 디테일 리스트 반환")
     @GetMapping("/orders")
@@ -60,5 +65,16 @@ public class UserController {
         User user = userRepository.findByEmail(jwtProvider.getUid(token));
         UserDto userDto = new UserDto(user);
         return ResponseEntity.ok(userDto);
+    }
+
+    @Operation(summary = "회원 탈퇴")
+    @DeleteMapping("")
+    public ResponseEntity<String> deleteUser(@RequestHeader(value = "Authorization")String token){
+        String email = jwtProvider.getUid(token);
+        User user = userRepository.findByEmail(email);
+        if (user == null) throw new UserException(ErrorCode.BAD_REQUEST, "존재하지 않는 유저입니다.");
+        userRepository.delete(user);
+        redisTemplate.opsForValue().getOperations().delete(token);  // 수정필요
+        return ResponseEntity.ok("회원탈퇴가 정상적으로 처리되었습니다.");
     }
 }

@@ -39,6 +39,15 @@ public class UserController {
         return ResponseEntity.ok(orderDetailListByToken);
     }
 
+    @Operation(summary = "유저의 좋아요 누른 발주 리스트 반환")
+    @GetMapping("/orders/like")
+    public ResponseEntity<Page<OrderDetailListDto>> getLikeOrderDetailListByUser(
+            @RequestHeader(value = "Authorization") String token,
+            @RequestParam(required = false, defaultValue = "1", value = "page") int page) {
+        Page<OrderDetailListDto> likedOrderDetailList = orderService.getLikeOrderDetailListByToken(token, page);
+        return ResponseEntity.ok(likedOrderDetailList);
+    }
+
     @Operation(summary = "유저/관리자 정보 전달")
     @GetMapping("")
     public ResponseEntity<?> getUserInfo(@RequestHeader(value = "Authorization")String token){

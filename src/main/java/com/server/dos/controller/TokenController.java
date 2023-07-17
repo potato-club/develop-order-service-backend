@@ -47,7 +47,7 @@ public class TokenController {
             return "NEW TOKEN";
         }
 
-        throw new TokenException(ErrorCode.UNAUTHORIZED,"토큰 재발급에 실패하였습니다.");
+        throw new TokenException(ErrorCode.INVALID_TOKEN,"토큰 재발급에 실패하였습니다.");
     }
 
     @Operation(summary = "테스트를 위한 가입/토큰발급")

@@ -17,7 +17,9 @@ public enum ErrorCode {
     CONFLICT(409, HttpStatus.CONFLICT, "서버 상태와 충돌합니다."),
     EXPIRED_TOKEN(444,HttpStatus.UNAUTHORIZED,"만료된 토큰입니다. 토큰 재발급을 진행해주세요."),
     RE_LOGIN(445,HttpStatus.UNAUTHORIZED,"모든 토큰이 만료되었습니다. 재로그인해주세요."),
-    INVALID_TOKEN(498,HttpStatus.UNAUTHORIZED,"유효하지 않은 토큰입니다.")
+    MISSING_TOKEN(475,HttpStatus.UNAUTHORIZED,"필요한 토큰이 누락되었습니다."),
+    UNSUPPORTED_TOKEN(482,HttpStatus.UNAUTHORIZED,"지원되지 않는 토큰 형식 또는 버전입니다"),
+    INVALID_TOKEN(498,HttpStatus.UNAUTHORIZED,"유효하지 않은 토큰 형식이나 구성으로 인해 토큰 검증에 실패했습니다.")
     ;
 
     private int code;

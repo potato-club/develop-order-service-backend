@@ -20,7 +20,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 
-import javax.servlet.ServletRequest;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
@@ -85,22 +84,14 @@ public class JwtProvider {  // 토큰 인증 및 검증
                     .build().parseClaimsJws(token);
             return true;
         }catch (ExpiredJwtException e){
-//            throw new TokenException(ErrorCode.EXPIRED_TOKEN,"토큰 기한이 만료되었습니다.");
-            logger.error("JWT token is expired: {}","토큰 기한이 만료되었습니다.");
+            throw new TokenException(ErrorCode.EXPIRED_TOKEN,"만료된 토큰입니다. 토큰 재발급을 진행해주세요.");
         }catch (UnsupportedJwtException e){
-//            throw new TokenException(ErrorCode.INVALID_TOKEN,"예상하는 형식과 일치하지 않는 특정 형식이나 구성의 토큰입니다.");
-            logger.error("JWT token is unsupported: {}",e.getMessage());
-        }catch (SignatureException e){
-//            throw new TokenException(ErrorCode.INVALID_TOKEN,"사용자 인증을 실패하였습니다..");
-            logger.error("Invalid JWT signature: {}",e.getMessage());
-        }catch (MalformedJwtException e){
-//            throw new TokenException(ErrorCode.INVALID_TOKEN,"올바른 JWT 구성이 아닙니다.");
-            logger.error("Invalid JWT signature: {}",e.getMessage());
+            throw new TokenException(ErrorCode.UNSUPPORTED_TOKEN,"예상하는 형식과 일치하지 않는 특정 형식이나 구성의 토큰입니다.");
+        }catch (SignatureException | MalformedJwtException e){
+            throw new TokenException(ErrorCode.INVALID_TOKEN,"유효하지 않은 토큰 형식이나 구성으로 인해 토큰 검증에 실패했습니다.");
         }catch (IllegalArgumentException e){
-//            throw new TokenException(ErrorCode.UNAUTHORIZED,e.getMessage());
-            logger.error("JWT claims string is empty: {}",e.getMessage());
+            throw new TokenException(ErrorCode.MISSING_TOKEN,"필요한 토큰이 누락되었습니다.");
         }
-        return false;
     }
 
     // JWT 토큰을 복호화하여 토큰에 들어있는 정보를 꺼내는 메소드

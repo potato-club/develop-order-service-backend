@@ -78,7 +78,7 @@ public class JwtProvider {  // 토큰 인증 및 검증
     }
 
 
-    public boolean verifyToken(String token, ServletRequest request){
+    public boolean verifyToken(String token){
         try {
             Jws<Claims> claims = Jwts.parserBuilder()
                     .setSigningKey(key)

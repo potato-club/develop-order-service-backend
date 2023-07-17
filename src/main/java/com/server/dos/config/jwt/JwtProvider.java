@@ -8,6 +8,8 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 
+import javax.servlet.ServletRequest;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,8 +31,9 @@ import java.util.stream.Collectors;
 @Component
 public class JwtProvider {  // 토큰 인증 및 검증
     private final Key key;
-    private final long accessExpire = 1000 * 60; // 30분
+    private final long accessExpire = 1000 * 60 * 10; // 30분
     private final long refreshExpire = 1000 * 60 * 60 * 24 * 14; // 2주
+    private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
 
     public JwtProvider(@Value("${jwt.secret}") String secretKey){
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
@@ -74,27 +78,29 @@ public class JwtProvider {  // 토큰 인증 및 검증
     }
 
 
-    public boolean verifyToken(String token){
+    public boolean verifyToken(String token, ServletRequest request){
         try {
             Jws<Claims> claims = Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build().parseClaimsJws(token);
-
-            return claims.getBody()
-                    .getExpiration()
-                    .after(new Date());
+            return true;
         }catch (ExpiredJwtException e){
-            throw new TokenException(ErrorCode.UNAUTHORIZED,"토큰 기한이 만료되었습니다.");
+//            throw new TokenException(ErrorCode.EXPIRED_TOKEN,"토큰 기한이 만료되었습니다.");
+            logger.error("JWT token is expired: {}","토큰 기한이 만료되었습니다.");
         }catch (UnsupportedJwtException e){
-            throw new TokenException(ErrorCode.UNAUTHORIZED,"예상하는 형식과 일치하지 않는 특정 형식이나 구성의 토큰입니다.");
+//            throw new TokenException(ErrorCode.INVALID_TOKEN,"예상하는 형식과 일치하지 않는 특정 형식이나 구성의 토큰입니다.");
+            logger.error("JWT token is unsupported: {}",e.getMessage());
         }catch (SignatureException e){
-            throw new TokenException(ErrorCode.UNAUTHORIZED,"사용자 인증을 실패하였습니다..");
+//            throw new TokenException(ErrorCode.INVALID_TOKEN,"사용자 인증을 실패하였습니다..");
+            logger.error("Invalid JWT signature: {}",e.getMessage());
         }catch (MalformedJwtException e){
-            throw new TokenException(ErrorCode.UNAUTHORIZED,"올바른 JWT 구성이 아닙니다.");
-        }catch (Exception e){
-            throw new TokenException(ErrorCode.UNAUTHORIZED,e.getMessage());
+//            throw new TokenException(ErrorCode.INVALID_TOKEN,"올바른 JWT 구성이 아닙니다.");
+            logger.error("Invalid JWT signature: {}",e.getMessage());
+        }catch (IllegalArgumentException e){
+//            throw new TokenException(ErrorCode.UNAUTHORIZED,e.getMessage());
+            logger.error("JWT claims string is empty: {}",e.getMessage());
         }
-
+        return false;
     }
 
     // JWT 토큰을 복호화하여 토큰에 들어있는 정보를 꺼내는 메소드

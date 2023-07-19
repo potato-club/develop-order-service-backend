@@ -20,7 +20,7 @@ public class OrderFile {
     @Column(nullable = false)
     private String fileName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 500)
     private String s3Url;
 
     @ManyToOne(fetch = FetchType.LAZY)

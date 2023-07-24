@@ -41,9 +41,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         log.info("토큰 발행 시작");
 
         TokenDto token = jwtProvider.generateToken(userDto.getEmail(),"USER");
-//        jwtProvider.sendAccessAndRefreshToken(response,token.getAccessToken(),token.getRefreshToken());
 
-        redisTemplate.opsForValue().set("User-RefreshToken",token.getRefreshToken());
+        String uid = jwtProvider.getUid(token.getRefreshToken());
+
+        redisTemplate.opsForValue().set("User-RefreshToken-"+uid,token.getRefreshToken());
 
 
         tagUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/login/")

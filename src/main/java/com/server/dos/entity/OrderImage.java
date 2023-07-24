@@ -20,7 +20,7 @@ public class OrderImage {
     @Column(nullable = false)
     private String imageName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 500)
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)

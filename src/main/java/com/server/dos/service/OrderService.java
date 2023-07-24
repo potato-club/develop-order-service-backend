@@ -114,7 +114,19 @@ public class OrderService {
         Page<OrderDetail> detailPaging =
                 detailRepository.findOrderDetailsByUserIdOrderByIdDesc(user.getId(), pageRequest);
         Page<OrderDetailListDto> detailDtoPaging = detailPaging.map(INSTANCE::toDetailListDto)
-                .map(dto -> addThumbnail(dto));
+                .map(this::addThumbnail);
+
+        return detailDtoPaging;
+    }
+
+    @Transactional
+    public Page<OrderDetailListDto> getLikeOrderDetailListByToken(String token, int page) {
+        User user = userRepository.findByEmail(jwtProvider.getUid(token));
+        PageRequest pageRequest = PageRequest.of(page - 1, 4,
+                Sort.by(Sort.Direction.DESC, "createdDate"));
+        Page<OrderDetail> detailPaging = likeRepository.findLikedOrderDetailsByUser(user, pageRequest);
+        Page<OrderDetailListDto> detailDtoPaging = detailPaging.map(INSTANCE::toDetailListDto)
+                .map(this::addThumbnail);
 
         return detailDtoPaging;
     }
@@ -123,7 +135,7 @@ public class OrderService {
     public List<OrderMainDto> getMainOrders() {
         List<OrderDetail> details = detailRepository.findTop5ByOrderByLikesDesc();
         return details.stream().filter(o -> o.getState().equals(COMPLETED)).map(INSTANCE::toDetailListDto)
-                .map(dto -> addThumbnail(dto))
+                .map(this::addThumbnail)
                 .map(OrderMainDto::new)
                 .collect(Collectors.toList());
     }

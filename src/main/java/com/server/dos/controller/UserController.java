@@ -74,8 +74,8 @@ public class UserController {
         User user = userRepository.findByEmail(email);
         if (user == null) throw new UserException(ErrorCode.BAD_REQUEST, "존재하지 않는 유저입니다.");
         userRepository.delete(user);
-//        String redis_token = (String) redisTemplate.opsForValue().get("User-RefreshToken-"+email);
-//        redisTemplate.delete(redis_token);
+
+        redisTemplate.delete("User-RefreshToken-"+email);   // redis에서 해당 유저 refresh token 값 삭제
         return ResponseEntity.ok("회원탈퇴가 정상적으로 처리되었습니다.");
     }
 }

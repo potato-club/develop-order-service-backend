@@ -8,8 +8,6 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -32,7 +30,6 @@ public class JwtProvider {  // 토큰 인증 및 검증
     private final Key key;
     private final long accessExpire = 1000 * 60 * 10; // 30분
     private final long refreshExpire = 1000 * 60 * 60 * 24 * 14; // 2주
-    private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
 
     public JwtProvider(@Value("${jwt.secret}") String secretKey){
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
@@ -129,12 +126,20 @@ public class JwtProvider {  // 토큰 인증 및 검증
         return Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody().getSubject();
     }
 
-//    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) throws IOException {
-//        response.setStatus(HttpServletResponse.SC_OK);
-//        response.setHeader("Authorization",accessToken);
-//        response.setHeader("Refresh",refreshToken);
-//
-//        log.info("Header 설정 완료");
-//
-//    }
+    public String recreateAccessToken(String refreshToken){
+        String uid = getUid(refreshToken);
+        String role = parseClaims(refreshToken).get("role").toString();
+
+        Claims claims = Jwts.claims().setSubject(uid); // sub(subject) : 토큰제목
+        claims.put("role",role);
+
+        Date now = new Date();
+
+        String accessToken = Jwts.builder()
+                .setClaims(claims)                                      // payload "role": "ROLE_USER"
+                .setExpiration(new Date(now.getTime() + accessExpire))  // payload "exp" : 14234532(예시)
+                .signWith(key)                 // header  "alg" : "HS256"
+                .compact();
+        return accessToken;
+    }
 }

@@ -26,7 +26,7 @@ public class TokenController {
     private final JwtProvider jwtProvider;
     private final TokenForTest tokenForTest;
 
-    @PostMapping("/refresh")
+    @GetMapping("/refresh")
     public ResponseEntity<?> refreshAuth(HttpServletRequest request) throws IOException {
         String refreshToken = request.getHeader("refresh");
 

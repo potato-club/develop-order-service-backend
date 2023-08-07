@@ -1,9 +1,6 @@
 package com.server.dos.exception;
 
-import com.server.dos.exception.custom.AdminException;
-import com.server.dos.exception.custom.OrderException;
-import com.server.dos.exception.custom.TokenException;
-import com.server.dos.exception.custom.UserException;
+import com.server.dos.exception.custom.*;
 import com.server.dos.exception.error.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -45,6 +42,13 @@ public class ErrorExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> handleUserException(UserException ex) {
         log.error("Admin Exception", ex);
+        ErrorResponse response = new ErrorResponse(ex.getErrorCode().getCode(), ex.getErrorMessage());
+        return new ResponseEntity<>(response, ex.getErrorCode().getStatus());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleInquiryException(InquiryException ex) {
+        log.error("Inquiry Exception", ex);
         ErrorResponse response = new ErrorResponse(ex.getErrorCode().getCode(), ex.getErrorMessage());
         return new ResponseEntity<>(response, ex.getErrorCode().getStatus());
     }

@@ -281,6 +281,17 @@ public class OrderService {
         return true;
     }
 
+    @Transactional
+    public List<Orders> findOrdersByUser(User user) {
+        return orderRepository.findByUser(user);
+    }
+
+    @Transactional
+    public void deleteUserData(User user) {
+        List<Orders> orders = findOrdersByUser(user);
+        if(orders != null) orders.forEach(order -> order.setUser(null));
+    }
+
     private OrderFile saveFile(Orders orders, String url) {
         OrderFile orderFile = OrderFile.builder()
                 .s3Url(url)

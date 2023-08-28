@@ -38,6 +38,7 @@ public class SecurityConfig {
                         "/swagger-ui.html", "/webjars/**", "/v3/api-docs").permitAll()
                 .antMatchers("/token/refresh","/token/dummy","/","/admin/login").permitAll()
                 .antMatchers(HttpMethod.GET, "/orders/main", "/orders/detail","/admin/info","/admin/schedule").permitAll() // antMatchers : 권한 관리 대상 지정
+                .antMatchers(HttpMethod.GET, "/inquiry").permitAll()
                 .anyRequest().authenticated()   // 나머지 URL들은 모두 인증된 사용자(로그인한 사용자)에게만 허용
                 .and()
                 .logout().logoutSuccessUrl("/").permitAll()

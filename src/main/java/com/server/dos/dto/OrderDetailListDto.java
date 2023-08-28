@@ -10,6 +10,7 @@ public class OrderDetailListDto {
     private Long id;
     private String siteName;
     private String purpose;
+    private String clientName;
     private LocalDateTime createdDate;
     private LocalDateTime completedDate;
     private OrderState state;

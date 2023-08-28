@@ -34,5 +34,6 @@ public interface OrderMapper {
     @Mapping(source = "orders.siteName", target = "siteName")
     @Mapping(source = "orders.purpose", target = "purpose")
     @Mapping(source = "orders.createdDate", target = "createdDate")
+    @Mapping(source = "orders.client.clientName", target = "clientName")
     OrderDetailListDto toDetailListDto(OrderDetail detail);
 }

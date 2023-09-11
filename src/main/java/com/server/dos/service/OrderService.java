@@ -100,7 +100,7 @@ public class OrderService {
         if (state.equals("complete")) {
             detailPaging = detailRepository.findCompletedDetails(pageRequest, COMPLETED);
         } else {
-            detailPaging = detailRepository.findNotCompletedDetails(pageRequest, COMPLETED);
+            detailPaging = detailRepository.findNotCompletedDetails(pageRequest, CHECK, COMPLETED);
         }
 
         return detailPaging.map(INSTANCE::toDetailListDto).map(this::addThumbnail);

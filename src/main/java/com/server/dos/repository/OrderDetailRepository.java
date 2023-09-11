@@ -22,9 +22,9 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
     countQuery = "select count(d) from OrderDetail d where d.state = :state")
     Page<OrderDetail> findCompletedDetails(Pageable pageable, OrderState state);
 
-    @Query(value = "select d from OrderDetail d where not d.state = :state",
-    countQuery = "select count(d) from OrderDetail d where not d.state = :state")
-    Page<OrderDetail> findNotCompletedDetails(Pageable pageable, OrderState state);
+    @Query(value = "select d from OrderDetail d where not (d.state = :state or d.state = :state_2)",
+    countQuery = "select count(d) from OrderDetail d where not (d.state = :state or d.state = :state_2)")
+    Page<OrderDetail> findNotCompletedDetails(Pageable pageable, OrderState state, OrderState state_2);
 
     @Query("select d.state from OrderDetail d where d.id=:id")
     OrderState findStateById(Long id);

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public enum InquiryResponse {
     RESPONSE_0_1("0", "1. 발주과정: 발주과정이 어떻게 되나요?", "1"),
-    RESPONSE_0_2("0", "2. 발주신청: 발주신청 관려해서 문의하고 싶어요.", "2"),
+    RESPONSE_0_2("0", "2. 발주신청: 발주신청 관련해서 문의하고 싶어요.", "2"),
     RESPONSE_0_3("0", "3. 발주현황: 발주현황 관련해서 문의하고 싶어요.", "3"),
     RESPONSE_0_4("0", "4. 회원탈퇴: 회원탈퇴를 하려면 어떻게 해야 하나요?", "4"),
     RESPONSE_1_1("1", "고객님이 신청하신 발주신청을 토대로, 1. 디자인회의, " +

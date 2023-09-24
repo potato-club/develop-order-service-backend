@@ -1,9 +1,7 @@
 package com.server.dos.controller;
 
 import com.server.dos.config.jwt.JwtProvider;
-import com.server.dos.dto.AdminDto;
-import com.server.dos.dto.OrderDetailListDto;
-import com.server.dos.dto.UserDto;
+import com.server.dos.dto.*;
 import com.server.dos.entity.user.Admin;
 import com.server.dos.entity.user.User;
 import com.server.dos.exception.custom.UserException;
@@ -20,6 +18,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import static com.server.dos.entity.user.Role.ADMIN;
 
 @Api(tags = "유저 API")
@@ -32,11 +32,16 @@ public class UserController {
     private final UserRepository userRepository;
     private final AdminRepository adminRepository;
     private final JwtProvider jwtProvider;
-
     private final RedisTemplate<String,Object> redisTemplate;
 
-    @Operation(summary = "유저의 발주 디테일 리스트 반환")
+    @Operation(summary = "마이페이지 발주 정보 반환")
     @GetMapping("/orders")
+    public List<MyOrderDto> getMyOrder(@RequestHeader(value = "Authorization") String token) {
+        return orderService.getMyPageOrders(token);
+    }
+
+    @Operation(summary = "유저의 발주 디테일 리스트 반환")
+    @GetMapping("/orders/detail")
     public ResponseEntity<Page<OrderDetailListDto>> getOrderDetailListByUser(
             @RequestHeader(value = "Authorization") String token,
             @RequestParam(required = false, defaultValue = "1", value = "page") int page) {

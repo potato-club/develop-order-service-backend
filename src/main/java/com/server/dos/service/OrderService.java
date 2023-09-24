@@ -17,10 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,7 +29,6 @@ import static com.server.dos.entity.user.Role.*;
 import static com.server.dos.mapper.OrderMapper.INSTANCE;
 
 @RequiredArgsConstructor
-@Transactional
 @Service
 @Slf4j
 public class OrderService {
@@ -42,12 +41,13 @@ public class OrderService {
     private final S3Service uploadService;
     private final JwtProvider jwtProvider;
 
-    @Transactional
+
+    @Transactional(readOnly = true)
     public Page<OrderListResponseDto> getOrdersByState(String token, int page, boolean checked) {
         if (!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 조회 불가능합니다.");
         PageRequest request = PageRequest.of(page - 1, 10, Sort.by(Sort.Direction.DESC, "id"));
         Page<Orders> all;
-        if(!checked) {
+        if (!checked) {
             all = orderRepository.findByOrderDetailState(request, CHECK);
         } else {
             all = orderRepository.findByOrderDetailWorking(request);
@@ -55,26 +55,26 @@ public class OrderService {
         return all.map(INSTANCE::toListResponse);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public OrderResponseDto getOrder(String token, Long orderId) {
         if (!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 조회 불가능합니다.");
         Orders orders = orderRepository.findById(orderId).orElseThrow();
         OrderResponseDto dto = INSTANCE.toResponse(orders);
         List<OrderFile> files = fileRepository.findByOrders(orders);
-        if(!files.isEmpty()) {
+        if (!files.isEmpty()) {
             List<FileDto> fileDtoList = files.stream().map(FileMapper.INSTANCE::toDto).collect(Collectors.toList());
             dto.setFiles(fileDtoList);
         }
         return dto;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<MeetingDateDto> getAllOrderMeeting() {
         List<Orders> all = orderRepository.findAll();
         return all.stream().map(INSTANCE::toMeeting).map(MeetingDateDto::new).collect(Collectors.toList());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public OrderDetailDto getOrderDetail(Long orderId) {
         OrderDetail detail = detailRepository.findById(orderId)
                 .orElseThrow(() -> new OrderException(ErrorCode.NOT_FOUND, "Order is not exist."));
@@ -82,12 +82,12 @@ public class OrderService {
         return INSTANCE.toDetailDto(detail);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<OrderDetailListDto> getOrderDetailList(String state, String sort, int page) {
         Page<OrderDetail> detailPaging;
         PageRequest pageRequest;
 
-        if(sort.equals("likes")) {
+        if (sort.equals("likes")) {
             pageRequest = PageRequest.of(page - 1, 4, Sort.by(Sort.Direction.DESC, "likes")
                     .and(Sort.by(Sort.Direction.DESC, "createdDate")));
         } else if (sort.equals("rating") && state.equals("complete")) {
@@ -106,20 +106,27 @@ public class OrderService {
         return detailPaging.map(INSTANCE::toDetailListDto).map(this::addThumbnail);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<OrderDetailListDto> getOrderDetailListByToken(String token, int page) {
         User user = userRepository.findByEmail(jwtProvider.getUid(token));
         PageRequest pageRequest = PageRequest.of(page - 1, 4,
                 Sort.by(Sort.Direction.DESC, "state"));
         Page<OrderDetail> detailPaging =
                 detailRepository.findOrderDetailsByUserIdOrderByIdDesc(user.getId(), pageRequest);
-        Page<OrderDetailListDto> detailDtoPaging = detailPaging.map(INSTANCE::toDetailListDto)
-                .map(this::addThumbnail);
 
-        return detailDtoPaging;
+        return detailPaging.map(INSTANCE::toDetailListDto).map(this::addThumbnail);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
+    public List<MyOrderDto> getMyPageOrders(String token) {
+        User user = userRepository.findByEmail(jwtProvider.getUid(token));
+        List<Orders> orders = orderRepository.findByUser(user);
+        return orders.stream().map(o ->
+                        new MyOrderDto(o.getId(), INSTANCE.toResponse(o), o.getDetail().getState()))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public Page<OrderDetailListDto> getLikeOrderDetailListByToken(String token, int page) {
         User user = userRepository.findByEmail(jwtProvider.getUid(token));
         PageRequest pageRequest = PageRequest.of(page - 1, 4,
@@ -131,7 +138,7 @@ public class OrderService {
         return detailDtoPaging;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<OrderMainDto> getMainOrders() {
         List<OrderDetail> details = detailRepository.findTop5ByOrderByLikesDesc();
         return details.stream().filter(o -> o.getState().equals(COMPLETED)).map(INSTANCE::toDetailListDto)
@@ -289,7 +296,7 @@ public class OrderService {
     @Transactional
     public void deleteUserData(User user) {
         List<Orders> orders = findOrdersByUser(user);
-        if(orders != null) orders.forEach(order -> order.setUser(null));
+        if (orders != null) orders.forEach(order -> order.setUser(null));
     }
 
     private OrderFile saveFile(Orders orders, String url) {

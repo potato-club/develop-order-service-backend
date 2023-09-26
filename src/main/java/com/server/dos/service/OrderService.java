@@ -213,6 +213,7 @@ public class OrderService {
         detailRepository.save(detail);
     }
 
+    @Transactional
     public void checkOrder(String token, Long orderId) {
         if (!checkAdmin(token)) throw new AdminException(ErrorCode.UNAUTHORIZED, "회원은 수정 불가능합니다.");
 

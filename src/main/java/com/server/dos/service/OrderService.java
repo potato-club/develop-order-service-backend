@@ -129,8 +129,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public Page<OrderDetailListDto> getLikeOrderDetailListByToken(String token, int page) {
         User user = userRepository.findByEmail(jwtProvider.getUid(token));
-        PageRequest pageRequest = PageRequest.of(page - 1, 4,
-                Sort.by(Sort.Direction.DESC, "createdDate"));
+        PageRequest pageRequest = PageRequest.of(page - 1, 4);
         Page<OrderDetail> detailPaging = likeRepository.findLikedOrderDetailsByUser(user, pageRequest);
         Page<OrderDetailListDto> detailDtoPaging = detailPaging.map(INSTANCE::toDetailListDto)
                 .map(this::addThumbnail);

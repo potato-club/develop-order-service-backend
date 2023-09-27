@@ -10,6 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface OrderLikeRepository extends JpaRepository<OrderLike, Long> {
     OrderLike findByOrderDetailAndUser(OrderDetail orderDetail, User user);
-    @Query("SELECT o.orderDetail FROM OrderLike o WHERE o.user = :user")
+    @Query("SELECT o.orderDetail FROM OrderLike o WHERE o.user = :user ORDER BY o.orderDetail.createdDate DESC")
     Page<OrderDetail> findLikedOrderDetailsByUser(User user, Pageable pageable);
 }

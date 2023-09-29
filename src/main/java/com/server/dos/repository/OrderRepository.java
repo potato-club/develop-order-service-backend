@@ -17,7 +17,7 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
     @Query("SELECT o FROM Orders o JOIN o.detail od WHERE od.state = :state")
     Page<Orders> findByOrderDetailState(Pageable pageable, OrderState state);
 
-    @Query("SELECT o FROM Orders o JOIN o.detail od WHERE od.state != com.server.dos.Enum.OrderState.CHECK AND " +
-            "od.state != com.server.dos.Enum.OrderState.COMPLETED")
+    @Query("SELECT o FROM Orders o JOIN o.detail od WHERE NOT (od.state = com.server.dos.Enum.OrderState.CHECK " +
+            "OR od.state = com.server.dos.Enum.OrderState.COMPLETED)")
     Page<Orders> findByOrderDetailWorking(Pageable pageable);
 }

@@ -40,8 +40,6 @@ public class User {
     @Column(name = "last_login_time")
     private LocalDateTime lastLoginTime;
 
-    @Column
-    public long betweenTime;
     @Builder
     public User (String name, String email,String picture,Role role,String provider){
         this.name = name;
@@ -68,13 +66,4 @@ public class User {
         this.lastLoginTime = lastLoginTime;
     }
 
-//    public boolean deleteCheck(){
-//        long betweenTime = ChronoUnit.MINUTES.between(this.deleteTime, this.lastLoginTime);
-//        return betweenTime >= 1 && ;
-//        if(this.deleteTime.isAfter(lastLoginTime)){
-//            if (betweenTime >= 1){
-//                return True;
-//            }
-//        }
-//    }
 }

@@ -62,6 +62,7 @@ public class User {
     public void setToken(String token){
         this.token = token;
     }
+    public void setProvider(String provider){ this.provider = provider;}
     public void setLastLoginTime(LocalDateTime lastLoginTime) {
         this.lastLoginTime = lastLoginTime;
     }

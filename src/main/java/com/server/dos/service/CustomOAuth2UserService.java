@@ -44,7 +44,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         log.info("userNameAttributeName: " + userNameAttributeName);
 
         OAuth2Attribute oAuth2Attribute = OAuth2Attribute.of(registrationId,userNameAttributeName,oAuth2User.getAttributes());
-        User user = saveOrUpdate(oAuth2Attribute,kakao_accessToken);
+        User user = saveOrUpdate(oAuth2Attribute,kakao_accessToken,registrationId);
 
         Map<String, Object> memberAttributes = oAuth2Attribute.convertToMap();
         // memberAttribute: {nickname=카카오 이름, id=id, key=id, email=카카오 이메일}
@@ -54,7 +54,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 memberAttributes,"email");
     }
 
-    public User saveOrUpdate(OAuth2Attribute oAuth2Attribute,String kakao_accessToken){
+    public User saveOrUpdate(OAuth2Attribute oAuth2Attribute,String kakao_accessToken,String provider){
 
         User user = userRepository.findByEmail(oAuth2Attribute.getEmail());
 
@@ -65,6 +65,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         }
         LocalDateTime now = LocalDateTime.now();
         user.setToken(kakao_accessToken);
+        user.setProvider(provider);
         user.setLastLoginTime(now);
 
         return userRepository.save(user);

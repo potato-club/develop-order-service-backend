@@ -19,30 +19,33 @@ public class OAuth2Attribute {
     private final String name;
 
     private final String picture;
+    private final String provider;
 
     @Builder
-    public OAuth2Attribute(Map<String,Object> attributes,String attributeKey,String email,String name,String picture){
+    public OAuth2Attribute(Map<String,Object> attributes, String attributeKey, String email, String name, String picture, String provider){
         this.attributes = attributes;
         this.attributeKey = attributeKey;
         this.email = email;
         this.name = name;
         this.picture = picture;
+        this.provider = provider;
     }
     public static OAuth2Attribute of(String provider, String attributeKey, Map<String, Object> attributes){
         switch (provider){
             case "kakao":
-                return ofKakao("email",attributes);
+                return ofKakao(provider,"email",attributes);
             case "google":
-                return ofGoogle(attributeKey,attributes);
+                return ofGoogle(provider,attributeKey,attributes);
             default:
                 throw new RuntimeException();
         }
     }
-    private static OAuth2Attribute ofKakao(String attributeKey, Map<String,Object> attributes){
+    private static OAuth2Attribute ofKakao(String provider,String attributeKey, Map<String,Object> attributes){
         Map<String,Object> kakaoAccount = (Map<String,Object>)attributes.get("kakao_account");
         Map<String,Object> kakaoProfile = (Map<String,Object>)kakaoAccount.get("profile");
 
         return OAuth2Attribute.builder()
+                .provider(provider)
                 .name((String)kakaoProfile.get("nickname"))
                 .email((String) kakaoAccount.get("email"))
                 .picture((String)kakaoProfile.get("thumbnail_image_url"))
@@ -50,9 +53,10 @@ public class OAuth2Attribute {
                 .attributeKey(attributeKey)
                 .build();
     }
-    private static OAuth2Attribute ofGoogle(String attributeKey, Map<String,Object> attributes){
+    private static OAuth2Attribute ofGoogle(String provider,String attributeKey, Map<String,Object> attributes){
 
         return OAuth2Attribute.builder()
+                .provider(provider)
                 .name((String)attributes.get("name"))
                 .email((String) attributes.get("email"))
                 .picture((String) attributes.get("picture"))
@@ -66,6 +70,7 @@ public class OAuth2Attribute {
                 .email(email)
                 .picture(picture)
                 .role(Role.USER)
+                .provider(provider)
                 .build();
     }
     public Map<String,Object> convertToMap(){

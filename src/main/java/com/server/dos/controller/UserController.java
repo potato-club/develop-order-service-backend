@@ -9,6 +9,7 @@ import com.server.dos.exception.error.ErrorCode;
 import com.server.dos.repository.AdminRepository;
 import com.server.dos.repository.UserRepository;
 import com.server.dos.service.OrderService;
+import com.server.dos.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import static com.server.dos.entity.user.Role.ADMIN;
 @Slf4j
 public class UserController {
     private final OrderService orderService;
+    private final UserService userService;
     private final UserRepository userRepository;
     private final AdminRepository adminRepository;
     private final JwtProvider jwtProvider;
@@ -77,10 +79,27 @@ public class UserController {
     public ResponseEntity<String> deleteUser(@RequestHeader(value = "Authorization")String token){
         String email = jwtProvider.getUid(token);
         User user = userRepository.findByEmail(email);
-        if (user == null) throw new UserException(ErrorCode.BAD_REQUEST, "존재하지 않는 유저입니다.");
-        orderService.deleteUserData(user);
-        userRepository.delete(user);
-        redisTemplate.delete("User-RefreshToken-"+email);   // redis에서 해당 유저 refresh token 값 삭제
-        return ResponseEntity.ok("회원탈퇴가 정상적으로 처리되었습니다.");
+        if (user == null) {
+            throw new UserException(ErrorCode.BAD_REQUEST, "존재하지 않는 유저입니다.");
+        }
+        log.info("provider: " + user.getProvider());
+        if (user.getProvider().equals("kakao")){
+            if (userService.deleteKakaoUser(user)){
+                orderService.deleteUserData(user);
+                userRepository.delete(user);
+                redisTemplate.delete("User-RefreshToken-" + user.getEmail());
+            }else{
+                return ResponseEntity.ok("탈퇴 실패");
+            }
+        }else if(user.getProvider().equals("google")){
+            if (userService.deleteGoogleUser(user)){
+                orderService.deleteUserData(user);
+                userRepository.delete(user);
+                redisTemplate.delete("User-RefreshToken-" + user.getEmail());
+            }else{
+                return ResponseEntity.ok("탈퇴 실패");
+            }
+        }
+        return ResponseEntity.ok("탈퇴 완료");
     }
 }
